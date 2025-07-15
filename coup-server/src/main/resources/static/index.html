@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coup</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link href="main.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+  enabled. Please enable
+  Javascript and reload this page!</h2></noscript>
+<div id="main-content" class="container">
+  <div id="token-input-section" class="row">
+    <div class="col-md-12">
+      <form class="form-inline">
+        <div class="form-group">
+          <label for="token">What is your room token?</label>
+          <input type="text" id="token" class="form-control" placeholder="Your token here...">
+        </div>
+        <button id="subscribeRoom" class="btn btn-primary" type="submit">Subscribe Room</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="room-section" class="row" style="display: none;">
+    <div class="col-md-12">
+      <h3>Current Room: <span id="currentRoomToken"></span></h3>
+
+      <div id="player-name-input" class="form-inline" style="margin-bottom: 20px;">
+        <div class="form-group">
+          <label for="playerName">Your Name:</label>
+          <input type="text" id="playerName" class="form-control" placeholder="Your name here...">
+        </div>
+        <button id="joinGame" class="btn btn-success" type="submit">Join Game</button>
+      </div>
+
+      <button id="leaveRoom" class="btn btn-warning" type="button">Leave Room</button>
+      <hr/>
+      <table id="conversation" class="table table-striped">
+        <thead>
+        <tr>
+          <th>Room State</th>
+        </tr>
+        </thead>
+        <tbody id="room-messages"> </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>
