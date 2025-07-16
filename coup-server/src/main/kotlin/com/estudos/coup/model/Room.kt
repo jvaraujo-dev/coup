@@ -17,7 +17,7 @@ data class Room(
     val token: String = UUID.randomUUID().toString(),
     val roomName: String,
 
-    @OneToMany(mappedBy = "room",fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "room",fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     var player: MutableList<Player> = mutableListOf()
 ){
     constructor() : this(
