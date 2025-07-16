@@ -41,10 +41,12 @@ class MatchService(private val roomRepository: RoomRepository, private val playe
     @Transactional
     private fun addPlayerToRoom(room: Room, playerToAdd: Player): Room{
         if (!(room.player.contains(playerToAdd))) {
+            playerToAdd.room = room
             room.player.add(playerToAdd)
         } else {
             println("Player with ID $playerToAdd is already in Room ${room.token}.")
         }
+        playerRepository.save(playerToAdd)
         return roomRepository.save(room)
     }
 }

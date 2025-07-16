@@ -3,7 +3,6 @@ package com.estudos.coup.controller
 import com.estudos.coup.controller.request.RoomRequest
 import com.estudos.coup.controller.response.RoomResponse
 import com.estudos.coup.model.toRoomResponse
-import com.estudos.coup.repository.PlayerRepository
 import com.estudos.coup.services.MatchService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping

@@ -1,9 +1,8 @@
 package com.estudos.coup.model
 
+import com.estudos.coup.controller.response.PlayerResponse
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import java.util.UUID
 import kotlin.collections.mutableListOf
@@ -22,5 +21,13 @@ data class Player(
         playerId = UUID.randomUUID().toString(),
         playerName = "",
         cards = mutableListOf()
+    )
+}
+fun Player.toPlayerResponse(): PlayerResponse{
+    return PlayerResponse(
+        playerId = this.playerId,
+        playerName = this.playerName,
+        cards = this.cards.toString(),
+        room = this.room?.roomName ?: ""
     )
 }
