@@ -24,11 +24,15 @@ data class Room(
         roomName = "",
         player = mutableListOf()
     )
+
+    override fun toString(): String {
+        return "Room(roomName='$roomName', token='$token')"
+    }
 }
 fun Room.toRoomResponse(): RoomResponse{
     return RoomResponse(
         roomName = this.roomName,
         token = this.token,
-        players = this.player
+        players = this.player.toString()
     )
 }

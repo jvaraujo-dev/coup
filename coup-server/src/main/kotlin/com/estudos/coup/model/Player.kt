@@ -1,5 +1,7 @@
 package com.estudos.coup.model
 
+import com.estudos.coup.controller.response.PlayerResponse
+import com.estudos.coup.controller.response.RoomResponse
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
@@ -22,5 +24,13 @@ data class Player(
         playerId = UUID.randomUUID().toString(),
         playerName = "",
         cards = mutableListOf()
+    )
+}
+fun Player.toPlayerResponse(): PlayerResponse{
+    return PlayerResponse(
+        playerId = this.playerId,
+        playerName = this.playerName,
+        cards = this.cards.toString(),
+        room = this.room?.roomName ?: ""
     )
 }
