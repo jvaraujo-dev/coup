@@ -18,7 +18,7 @@ Run and build the project:
 make up
 ```
 
-To stop and remove the docker images, run:
+To stop and remove the containers, run:
 ```
 make down
 ```
