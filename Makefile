@@ -20,7 +20,7 @@ build_backend:
 
 up:
 	@echo "--- Bringing up Docker Compose services ---"
-	docker compose up -d # -d para rodar em detached mode
+	docker compose up -d
 	@echo "--- Services are up and running ---"
 	@echo "Frontend will be available at http://localhost:3000"
 	@echo "Backend will be available at http://localhost:8080"
