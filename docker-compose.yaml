@@ -12,19 +12,6 @@ services:
       - '3000:3000'
     restart: always
     environment:
-      # Permite que o frontend se conecte ao backend
       NEXT_PUBLIC_WEBSOCKET_URL: ws://app:8080/room-websocket
     depends_on:
       - coup-backend
-#    depends_on:
-#      - redis
-#  redis:
-#    image: redis:latest
-#    container_name: redis_coup
-#    ports:
-#      - '6379:6379'
-#    volumes:
-#      - redis_data:/data
-#    restart: always
-#volumes:
-#  redis_data:
