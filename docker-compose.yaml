@@ -1,19 +1,17 @@
 services:
-  app:
-    build: coup-server
-    container_name: app_coup
+  coup-backend:
+    build: ./coup-server
+    container_name: coup_backend
     ports:
       - '8080:8080'
     restart: always
-    depends_on:
-      - redis
-  redis:
-    image: redis:latest
-    container_name: redis_coup
+  coup-frontend:
+    build: ./coup-client
+    container_name: coup_frontend
     ports:
-      - '6379:6379'
-    volumes:
-      - redis_data:/data
+      - '3000:3000'
     restart: always
-volumes:
-  redis_data:
+    environment:
+      NEXT_PUBLIC_WEBSOCKET_URL: ws://app:8080/room-websocket
+    depends_on:
+      - coup-backend
