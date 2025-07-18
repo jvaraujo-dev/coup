@@ -18,34 +18,7 @@ build_backend:
 	cd $(BACKEND_DIR) && ./gradlew clean build -x test
 	@echo "--- Backend build complete ---"
 
-build_docker: build_backend
-	@echo "--- Building Docker images ---"
-	docker compose build coup-backend
-	docker compose build coup-frontend
-	@echo "--- Docker images built ---"
-
-up: build_backend
-	@echo "--- Bringing up Docker Compose services ---"
-	docker compose up
-	@echo "--- Services are up and running ---"
-	@echo "Frontend will be available at http://localhost:3000"
-	@echo "Backend will be available at http://localhost:8080"
-
-up_d: build_backend
-	@echo "--- Bringing up Docker Compose services ---"
-	docker compose up -d
-	@echo "--- Services are up and running ---"
-	@echo "Frontend will be available at http://localhost:3000"
-	@echo "Backend will be available at http://localhost:8080"
-
-build_up: build_docker
-	@echo "--- Bringing up Docker Compose services ---"
-	docker compose up
-	@echo "--- Services are up and running ---"
-	@echo "Frontend will be available at http://localhost:3000"
-	@echo "Backend will be available at http://localhost:8080"
-
-build_up_d: build_docker
+up:
 	@echo "--- Bringing up Docker Compose services ---"
 	docker compose up -d
 	@echo "--- Services are up and running ---"
