@@ -6,7 +6,11 @@ COPY package.json yarn.lock* package-lock.json* ./
 
 RUN npm install
 
-COPY . .
+COPY src ./src
+COPY public ./public
+COPY next.config.ts ./
+COPY postcss.config.mjs ./
+COPY eslint.config.mjs ./
 
 RUN npm run build
 
