@@ -4,6 +4,8 @@ FRONTEND_DIR = coup-client
 BACKEND_JAR_NAME = coup-0.0.1-SNAPSHOT.jar
 BACKEND_JAR_PATH = $(BACKEND_DIR)/build/libs/$(BACKEND_JAR_NAME)
 
+GRADLEW = $(BACKEND_DIR)/gradlew
+
 .PHONY: all build_backend build_frontend build_docker up clean prune
 
 all: up
@@ -31,7 +33,7 @@ up: build_backend
 	@echo "Frontend will be available at http://localhost:3000"
 	@echo "Backend will be available at http://localhost:8080"
 
-up_d: build_backend
+start: build_backend
 	@echo "--- Bringing up Docker Compose services ---"
 	docker compose up -d
 	@echo "--- Services are up and running ---"
@@ -45,7 +47,7 @@ build_up: build_docker
 	@echo "Frontend will be available at http://localhost:3000"
 	@echo "Backend will be available at http://localhost:8080"
 
-build_up_d: build_docker
+build_start: build_docker
 	@echo "--- Bringing up Docker Compose services ---"
 	docker compose up -d
 	@echo "--- Services are up and running ---"
