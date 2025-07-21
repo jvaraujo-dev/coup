@@ -1,7 +1,25 @@
+// coup-client/src/app/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react'; // Import useRef
 import { Client } from '@stomp/stompjs';
+
+// Define as interfaces para os tipos de dados que esperamos
+interface CardType {
+  displayName: string; // Adicione outras propriedades da carta se existirem no backend
+}
+
+interface PlayerState {
+  playerId: string;
+  playerName: string;
+  cards: CardType[] | string[]; // As cartas podem vir como objetos CardType ou strings
+}
+
+interface RoomState {
+  token: string;
+  roomName: string;
+  players: PlayerState[];
+}
 
 export default function CoupGamePage() {
   const [roomNameInput, setRoomNameInput] = useState<string>('');
@@ -9,16 +27,20 @@ export default function CoupGamePage() {
   const [isError, setIsError] = useState<boolean>(false);
   const [roomToken, setRoomToken] = useState<string | null>(null);
   const [playerNameInput, setPlayerNameInput] = useState<string>('');
-  const [roomState, setRoomState] = useState<any>(null); // Para armazenar o estado da sala recebido do WebSocket
-  const [stompClientInstance, setStompClientInstance] = useState<Client | null>(null);
+  const [roomState, setRoomState] = useState<RoomState | null>(null);
+  // stompClientInstance foi removido, pois não estava sendo utilizado na UI.
+  // A lógica de conexão agora depende apenas de stompClientRef.
+  const stompClientRef = useRef<Client | null>(null); // Ref para a instância do cliente STOMP
 
   // URLs do backend (ajustar conforme seu ambiente)
   const backendHttpUrl = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL || 'http://localhost:8080';
+  console.log("urlBackend: "+backendHttpUrl)
   const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8080/room-websocket';
+  console.log("urlWebsocket: "+websocketUrl)
+  console.log("processEnv: "+process.env.NEXT_PUBLIC_BACKEND_HTTP_URL+ " "+ process.env.NEXT_PUBLIC_WEBSOCKET_URL)
 
   // Função auxiliar para analisar a string de jogadores recebida do backend
-  // Ex: "[Player(playerId=id1, playerName=Player1, cards=[CARD1, CARD2]), Player(...)]"
-  const parsePlayersString = (playersString: string | null | undefined) => {
+  const parsePlayersString = useCallback((playersString: string | null | undefined): PlayerState[] => {
     if (!playersString) return [];
 
     // Remove os colchetes externos e divide a string em partes de jogadores
@@ -42,21 +64,24 @@ export default function CoupGamePage() {
           .split(', ')
           .filter(s => s.trim() !== ''); // Divide por ", " e remove entradas vazias
 
-        return { playerId, playerName, cards };
+        // Retorna um objeto que corresponde à interface PlayerState
+        return { playerId, playerName, cards } as PlayerState;
       }
       return null; // Retorna null para strings que não puderam ser analisadas
-    }).filter(p => p !== null); // Filtra quaisquer resultados nulos
-  };
+    }).filter((p): p is PlayerState => p !== null); // Filtra quaisquer resultados nulos e garante o tipo
+  }, []); // Array de dependências vazio, pois a função não depende de nenhum estado ou prop do componente.
 
 
   // Efeito para gerenciar a conexão WebSocket
   useEffect(() => {
     if (roomToken) {
-      // Se já existe um cliente STOMP ativo, desativá-lo primeiro
-      if (stompClientInstance && stompClientInstance.active) {
-        stompClientInstance.deactivate();
+      // Se já existe um cliente STOMP ativo (no ref), desativá-lo primeiro
+      if (stompClientRef.current && stompClientRef.current.active) {
+        stompClientRef.current.deactivate();
+        stompClientRef.current = null; // Limpa a referência antiga
       }
 
+      // Declara client como const, garantindo que não será null neste escopo
       const client = new Client({
         brokerURL: websocketUrl,
         reconnectDelay: 5000,
@@ -70,7 +95,7 @@ export default function CoupGamePage() {
         setMessage('Conectado ao WebSocket da sala!');
         setIsError(false);
 
-        // Se conectou com sucesso, subscreve ao tópico da sala
+        // TypeScript já sabe que 'client' não é null aqui
         client.subscribe(`/topic/state-room/${roomToken}`, (room) => {
           try {
             // Primeiro, faz o parse JSON do corpo da mensagem
@@ -124,22 +149,24 @@ export default function CoupGamePage() {
       };
 
       client.activate();
-      setStompClientInstance(client);
+      stompClientRef.current = client; // Armazena o cliente no ref
+      // setStompClientInstance(client); // Removido: não é mais necessário, pois não é usado na UI
 
       // Função de limpeza para desativar o cliente STOMP ao desmontar o componente ou mudar o token
       return () => {
-        if (client.active) {
-          client.deactivate();
+        if (stompClientRef.current && stompClientRef.current.active) { // Usa o ref para a limpeza
+          stompClientRef.current.deactivate();
         }
       };
     } else {
-      // Se não há roomToken, garante que o cliente STOMP seja desativado
-      if (stompClientInstance && stompClientInstance.active) {
-        stompClientInstance.deactivate();
+      // Se não há roomToken, garante que o cliente STOMP (no ref) seja desativado
+      if (stompClientRef.current && stompClientRef.current.active) {
+        stompClientRef.current.deactivate();
       }
-      setStompClientInstance(null);
+      stompClientRef.current = null; // Limpa o ref
+      // setStompClientInstance(null); // Removido: não é mais necessário
     }
-  }, [roomToken, websocketUrl]); // Dependências: roomToken e websocketUrl
+  }, [roomToken, websocketUrl, parsePlayersString]); // stompClientInstance não é mais uma dependência
 
   const handleCreateRoom = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -181,29 +208,40 @@ export default function CoupGamePage() {
   };
 
   const handleJoinGame = () => {
+    setMessage(''); // Limpa mensagens anteriores
+    setIsError(false);
+
     if (!playerNameInput.trim()) {
-      alert("Por favor, insira seu nome de jogador.");
+      setMessage("Por favor, insira seu nome de jogador.");
+      setIsError(true);
       return;
     }
 
-    if (!roomToken || !stompClientInstance || !stompClientInstance.active) {
-      alert("Você precisa estar em uma sala e ter uma conexão WebSocket ativa para entrar no jogo.");
+    if (!roomToken) {
+      setMessage("Você precisa estar em uma sala para entrar no jogo.");
+      setIsError(true);
       return;
     }
 
-    stompClientInstance.publish({
+    // Usa stompClientRef.current para acessar a instância ativa do cliente
+    if (!stompClientRef.current || !stompClientRef.current.active) {
+      setMessage("Conexão WebSocket não está ativa. Tente novamente ou verifique a sala.");
+      setIsError(true);
+      return;
+    }
+
+    stompClientRef.current.publish({
       destination: `/app/join-game/${roomToken}`,
       body: playerNameInput,
     });
 
     console.log(`Sent join-game request for player: ${playerNameInput} in room: ${roomToken}`);
-    // Opcional: Esconder o campo de nome após entrar no jogo, se desejar
-    // setPlayerNameInput('');
   };
 
   const handleLeaveRoom = () => {
-    if (stompClientInstance && stompClientInstance.active) {
-      stompClientInstance.deactivate();
+    // Usa stompClientRef.current para acessar a instância ativa do cliente
+    if (stompClientRef.current && stompClientRef.current.active) {
+      stompClientRef.current.deactivate();
     }
     setRoomToken(null); // Volta para a tela de criação de sala
     setRoomState(null); // Limpa o estado da sala
@@ -273,13 +311,12 @@ export default function CoupGamePage() {
               </thead>
               <tbody>
                 {roomState?.players && roomState.players.length > 0 ? (
-                  roomState.players.map((player: any) => (
+                  roomState.players.map((player: PlayerState) => ( // Tipagem PlayerState aqui
                     <tr key={player.playerId}>
                       <td>{player.playerName}</td>
                       <td>
                         {/* Como 'cards' agora é um array de strings (ex: ["DUQUE"]),
-                            apenas unimos os elementos. O app.js usava card.displayName || card,
-                            mas aqui card é a própria string do nome da carta. */}
+                            apenas unimos os elementos. */}
                         {Array.isArray(player.cards) && player.cards.length > 0
                           ? player.cards.join(', ')
                           : 'Sem cartas'}
