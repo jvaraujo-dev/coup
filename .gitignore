@@ -41,7 +41,6 @@ coup-client/next-env.d.ts
 /target/ # Para projetos Maven, mas pode ser útil
 
 coup-client/package-lock.json
-coup-client/package.json
 /yarn.lock
 
 HELP.md
