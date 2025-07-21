@@ -8,16 +8,37 @@ This project implements the "Coup" card game, focusing on backend logic and real
 
 ## Building and Running with Docker
 
+### Requirements
+
+- [Docker Engine](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Java 21](https://www.oracle.com/br/java/technologies/downloads/#java21)
+
+If you use Linux, you can also install java by [SDKMan](https://sdkman.io/)
+___
 Clone project source code:
 ```sh
 git clone https://github.com/jvaraujo-dev/coup.git
 ```
+___
+Set your java version to 21
 
-Run and build the project:
+If you use SDKMan you can run a command like this:
 ```
-make up
+sdk use java 21.0.7-oracle
+```
+Remember to switch the 21.0.7-oracle for the version that you downloaded
+___
+Build and Run the project:
+```
+make build_start
 ```
 
+This command will build the images for the docker and start the projects, if you already build, you can just run
+```
+make start
+```
+___
 To stop and remove the containers, run:
 ```
 make down
