@@ -1,18 +1,17 @@
-// coup-client/src/app/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react'; // Import useRef
 import { Client } from '@stomp/stompjs';
 
-// Define as interfaces para os tipos de dados que esperamos
+// Define as interfaces
 interface CardType {
-  displayName: string; // Adicione outras propriedades da carta se existirem no backend
+  displayName: string;
 }
 
 interface PlayerState {
   playerId: string;
   playerName: string;
-  cards: CardType[] | string[]; // As cartas podem vir como objetos CardType ou strings
+  cards: CardType[] | string[];
 }
 
 interface RoomState {
@@ -28,26 +27,18 @@ export default function CoupGamePage() {
   const [roomToken, setRoomToken] = useState<string | null>(null);
   const [playerNameInput, setPlayerNameInput] = useState<string>('');
   const [roomState, setRoomState] = useState<RoomState | null>(null);
-  // stompClientInstance foi removido, pois não estava sendo utilizado na UI.
-  // A lógica de conexão agora depende apenas de stompClientRef.
   const stompClientRef = useRef<Client | null>(null); // Ref para a instância do cliente STOMP
 
-  // URLs do backend (ajustar conforme seu ambiente)
   const backendHttpUrl = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL || 'http://localhost:8080';
-  console.log("urlBackend: "+backendHttpUrl)
   const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8080/room-websocket';
-  console.log("urlWebsocket: "+websocketUrl)
-  console.log("processEnv: "+process.env.NEXT_PUBLIC_BACKEND_HTTP_URL+ " "+ process.env.NEXT_PUBLIC_WEBSOCKET_URL)
 
   // Função auxiliar para analisar a string de jogadores recebida do backend
   const parsePlayersString = useCallback((playersString: string | null | undefined): PlayerState[] => {
     if (!playersString) return [];
 
-    // Remove os colchetes externos e divide a string em partes de jogadores
     const playerStrings = playersString.substring(1, playersString.length - 1).split('), Player(');
 
     return playerStrings.map(playerStr => {
-      // Remove o prefixo "Player(" se existir (para o primeiro elemento)
       const cleanedPlayerStr = playerStr.startsWith('Player(') ? playerStr.substring(7) : playerStr;
 
       // Usa regex para extrair playerId, playerName e a string de cards
@@ -60,19 +51,17 @@ export default function CoupGamePage() {
 
         // Analisa a string de cards: "[CARD1, CARD2]" -> ["CARD1", "CARD2"]
         const cards = cardsRaw
-          .substring(1, cardsRaw.length - 1) // Remove os colchetes
+          .replace(/\[|\]/g, "")
           .split(', ')
-          .filter(s => s.trim() !== ''); // Divide por ", " e remove entradas vazias
+          .slice(0, 2);
 
-        // Retorna um objeto que corresponde à interface PlayerState
         return { playerId, playerName, cards } as PlayerState;
       }
-      return null; // Retorna null para strings que não puderam ser analisadas
-    }).filter((p): p is PlayerState => p !== null); // Filtra quaisquer resultados nulos e garante o tipo
-  }, []); // Array de dependências vazio, pois a função não depende de nenhum estado ou prop do componente.
+      return null;
+    }).filter((p): p is PlayerState => p !== null);
+  }, []);
 
-
-  // Efeito para gerenciar a conexão WebSocket
+  // Gerencia a conexão WebSocket
   useEffect(() => {
     if (roomToken) {
       // Se já existe um cliente STOMP ativo (no ref), desativá-lo primeiro
@@ -81,7 +70,6 @@ export default function CoupGamePage() {
         stompClientRef.current = null; // Limpa a referência antiga
       }
 
-      // Declara client como const, garantindo que não será null neste escopo
       const client = new Client({
         brokerURL: websocketUrl,
         reconnectDelay: 5000,
@@ -95,15 +83,11 @@ export default function CoupGamePage() {
         setMessage('Conectado ao WebSocket da sala!');
         setIsError(false);
 
-        // TypeScript já sabe que 'client' não é null aqui
         client.subscribe(`/topic/state-room/${roomToken}`, (room) => {
           try {
-            // Primeiro, faz o parse JSON do corpo da mensagem
             const rawRoomState = JSON.parse(room.body);
-            // Agora, usa a função auxiliar para analisar a string de players
             const parsedPlayers = parsePlayersString(rawRoomState.players);
 
-            // Atualiza o estado da sala com os players analisados
             setRoomState({
               token: rawRoomState.token,
               roomName: rawRoomState.roomName,
@@ -122,7 +106,6 @@ export default function CoupGamePage() {
           }
         });
 
-        // Solicita o estado inicial da sala
         client.publish({
           destination: "/app/state-game",
           body: roomToken
@@ -149,22 +132,18 @@ export default function CoupGamePage() {
       };
 
       client.activate();
-      stompClientRef.current = client; // Armazena o cliente no ref
-      // setStompClientInstance(client); // Removido: não é mais necessário, pois não é usado na UI
+      stompClientRef.current = client;
 
-      // Função de limpeza para desativar o cliente STOMP ao desmontar o componente ou mudar o token
       return () => {
         if (stompClientRef.current && stompClientRef.current.active) { // Usa o ref para a limpeza
           stompClientRef.current.deactivate();
         }
       };
     } else {
-      // Se não há roomToken, garante que o cliente STOMP (no ref) seja desativado
       if (stompClientRef.current && stompClientRef.current.active) {
         stompClientRef.current.deactivate();
       }
-      stompClientRef.current = null; // Limpa o ref
-      // setStompClientInstance(null); // Removido: não é mais necessário
+      stompClientRef.current = null;
     }
   }, [roomToken, websocketUrl, parsePlayersString]); // stompClientInstance não é mais uma dependência
 
@@ -191,7 +170,7 @@ export default function CoupGamePage() {
 
       if (response.ok) {
         const roomData = await response.json();
-        setRoomToken(roomData.token); // Define o token da sala para ativar o useEffect
+        setRoomToken(roomData.token);
         setMessage(`Sala "${roomData.roomName}" criada com sucesso! Token: ${roomData.token}`);
         setIsError(false);
         setRoomNameInput('');
@@ -208,7 +187,7 @@ export default function CoupGamePage() {
   };
 
   const handleJoinGame = () => {
-    setMessage(''); // Limpa mensagens anteriores
+    setMessage('');
     setIsError(false);
 
     if (!playerNameInput.trim()) {
@@ -223,7 +202,6 @@ export default function CoupGamePage() {
       return;
     }
 
-    // Usa stompClientRef.current para acessar a instância ativa do cliente
     if (!stompClientRef.current || !stompClientRef.current.active) {
       setMessage("Conexão WebSocket não está ativa. Tente novamente ou verifique a sala.");
       setIsError(true);
@@ -239,13 +217,12 @@ export default function CoupGamePage() {
   };
 
   const handleLeaveRoom = () => {
-    // Usa stompClientRef.current para acessar a instância ativa do cliente
     if (stompClientRef.current && stompClientRef.current.active) {
       stompClientRef.current.deactivate();
     }
-    setRoomToken(null); // Volta para a tela de criação de sala
-    setRoomState(null); // Limpa o estado da sala
-    setPlayerNameInput(''); // Limpa o nome do jogador
+    setRoomToken(null);
+    setRoomState(null);
+    setPlayerNameInput('');
     setMessage('Você saiu da sala.');
     setIsError(false);
   };
@@ -254,7 +231,6 @@ export default function CoupGamePage() {
     <div className="center-container">
       <div className="form-card">
         {!roomToken ? (
-          // Se não há token da sala, mostra o formulário de criar sala
           <>
             <h2>Criar Nova Sala</h2>
             <form onSubmit={handleCreateRoom}>
@@ -276,7 +252,6 @@ export default function CoupGamePage() {
             </form>
           </>
         ) : (
-          // Se há token da sala, mostra os detalhes da sala e a interface do jogo
           <>
             <h2>Sala Atual: <span id="currentRoomToken">{roomState?.roomName || 'Carregando...'}</span></h2>
             <p>Token da Sala: <strong>{roomToken}</strong></p>
@@ -311,12 +286,10 @@ export default function CoupGamePage() {
               </thead>
               <tbody>
                 {roomState?.players && roomState.players.length > 0 ? (
-                  roomState.players.map((player: PlayerState) => ( // Tipagem PlayerState aqui
+                  roomState.players.map((player: PlayerState) => (
                     <tr key={player.playerId}>
                       <td>{player.playerName}</td>
                       <td>
-                        {/* Como 'cards' agora é um array de strings (ex: ["DUQUE"]),
-                            apenas unimos os elementos. */}
                         {Array.isArray(player.cards) && player.cards.length > 0
                           ? player.cards.join(', ')
                           : 'Sem cartas'}
