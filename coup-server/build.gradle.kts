@@ -8,6 +8,7 @@ plugins {
 	id("org.springframework.boot") version "3.5.3"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("io.gitlab.arturbosch.detekt") version "1.23.8"
+	jacoco
 }
 
 group = "com.estudos"
@@ -44,6 +45,7 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -57,6 +59,9 @@ tasks.withType<KotlinCompile>().configureEach {
 	}
 }
 
+jacoco {
+	toolVersion = "0.8.13"
+}
 
 detekt {
 	buildUponDefaultConfig = true // preconfigure defaults
@@ -79,4 +84,39 @@ tasks.withType<Detekt>().configureEach {
 }
 tasks.withType<DetektCreateBaselineTask>().configureEach {
 	jvmTarget = "21"
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
+
+	classDirectories.setFrom(
+		fileTree( layout.buildDirectory.dir("/classes/kotlin/main")).apply {
+			exclude(
+				"**/config/**",
+				"**/model/**",
+				"**/exception/**",
+				"**/dto/**",
+				"**/CoupApplication*.class",
+			)
+		}
+	)
+}
+
+tasks.jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				// TODO: increase minimum coverage when test are implemented
+				minimum = "0.1".toBigDecimal()
+			}
+		}
+	}
+}
+
+tasks.check {
+	dependsOn(tasks.jacocoTestCoverageVerification)
 }

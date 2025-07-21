@@ -12,7 +12,6 @@ services:
       - '3000:3000'
     restart: always
     environment:
-      NEXT_PUBLIC_WEBSOCKET_URL: ws://coup-backend:8080/room-websocket
-      NEXT_PUBLIC_BACKEND_HTTP_URL: http://coup-backend:8080
+      NEXT_PUBLIC_WEBSOCKET_URL: ws://app:8080/room-websocket
     depends_on:
       - coup-backend
