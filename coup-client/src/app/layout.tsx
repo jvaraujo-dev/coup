@@ -1,12 +1,11 @@
-// coup-client/src/app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css'; // Importa seu CSS global
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Coup - Create Room', // Título da página
+  title: 'Coup - Create Room',
   description: 'Create a new room for the Coup game.',
 };
 
@@ -27,7 +26,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        {children} {/* Aqui é onde o conteúdo da sua página (page.tsx) será renderizado */}
+        {children}
       </body>
     </html>
   );
