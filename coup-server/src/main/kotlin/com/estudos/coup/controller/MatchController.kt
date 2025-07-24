@@ -21,11 +21,7 @@ class MatchController(private val matchService: MatchService, private val simpMe
         val playerName = request
         println("Player '$playerName' attempting to join room '$roomToken'")
 
-        val updatedRoom = matchService.enterMatchRoom(roomToken = roomToken, playerName = playerName)
-        println("======= INICIO =======")
-        println(updatedRoom)
-        println("======= FIM =======")
-        publishRoomState(updatedRoom)
+        matchService.enterMatchRoom(roomToken = roomToken, playerName = playerName)
     }
 
     private fun publishRoomState(room: RoomResponse){
