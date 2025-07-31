@@ -2,7 +2,9 @@ package com.estudos.coup.controller
 
 import com.estudos.coup.controller.response.RoomResponse
 import com.estudos.coup.services.MatchService
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +27,7 @@ class MatchControllerTests {
     }
 
     @Test
-    fun shouldReturnRoomStateWithoutPlayers(){
+    fun shouldPublishRoomStateWithoutPlayers(){
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val room = RoomResponse(tokenRoom, roomName, "[]")
@@ -38,7 +40,7 @@ class MatchControllerTests {
     }
 
     @Test
-    fun shouldReturnRoomStateWithValidPlayers(){
+    fun shouldPublishRoomStateWithValidPlayers(){
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val players = "[Player(playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, playerName=Player 1, cards=[ASSASSINO, EMBAIXADOR], room=Room(roomName=$roomName, token=$tokenRoom))]"
@@ -50,5 +52,20 @@ class MatchControllerTests {
         controller.stateRoom(tokenRoom)
 
         verify { simpMessagingTemplate.convertAndSend(any(), eq(room)) }
+    }
+
+    @Test
+    fun shouldJoinAnExistentRoom(){
+        val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
+        val roomName = "Test state-game"
+        val playerName = "Player 1"
+        val players = "[Player(playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, playerName=Player 1, cards=[ASSASSINO, EMBAIXADOR], room=Room(roomName=$roomName, token=$tokenRoom))]"
+        val room = RoomResponse(tokenRoom, roomName, players)
+
+        every { matchService.enterMatchRoom(any(),any()) } returns room
+
+        controller.joinGame(tokenRoom, playerName)
+
+        verify { matchService.enterMatchRoom(eq(tokenRoom), eq(playerName)) }
     }
 }
