@@ -19,7 +19,7 @@ class MatchmakingController(
     @PostMapping("/create-room")
     @ResponseStatus(HttpStatus.CREATED)
     fun createRoom(@RequestBody roomParameters: RoomRequest): RoomResponse {
-        val roomResponse = matchService.createRoom(roomName = roomParameters.roomName).toRoomResponse();
+        val roomResponse = matchService.createRoom(roomName = roomParameters.roomName).toRoomResponse()
         return roomResponse;
     }
 }
