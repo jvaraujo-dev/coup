@@ -33,7 +33,7 @@ COPY gradlew ./
 COPY gradle ./gradle
 
 # Copia o resto do código-fonte do projeto
-COPY src ./src
+COPY coup-server/src ./src
 
 # Executa o build do Gradle para gerar o arquivo .jar executável.
 # '-x test' pula os testes para um build mais rápido.
