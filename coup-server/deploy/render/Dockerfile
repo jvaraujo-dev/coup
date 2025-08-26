@@ -19,24 +19,26 @@
 #ENTRYPOINT ["java", "-jar", "coup.jar"]
 
 # --- Estágio 1: Build ---
-# Usamos uma imagem oficial do Maven que já inclui o JDK 21 (Temurin).
-# Isso é muito mais eficiente e confiável do que instalar tudo numa imagem base do Ubuntu.
-FROM maven:3.9-eclipse-temurin-21 AS build
+# Usamos uma imagem oficial do Gradle que já inclui o JDK 21.
+# É a forma mais limpa e confiável para projetos Gradle.
+FROM gradle:8-jdk21 AS build
 
-# Define o diretório de trabalho dentro do contêiner
-WORKDIR /app
+# Define o diretório de trabalho padrão da imagem Gradle
+WORKDIR /home/gradle/src
 
-# Copia primeiro o pom.xml para aproveitar o cache de camadas do Docker.
-# As dependências só serão baixadas novamente se o pom.xml mudar.
-COPY pom.xml .
-RUN mvn dependency:go-offline
+# Copia os arquivos de configuração do Gradle e o wrapper para aproveitar o cache.
+# As dependências só serão baixadas novamente se esses arquivos mudarem.
+COPY build.gradle settings.gradle ./
+COPY gradlew ./
+COPY gradle ./gradle
 
 # Copia o resto do código-fonte do projeto
-COPY coup-server/src ./src
+COPY src ./src
 
-# Executa o build do Maven para gerar o arquivo .jar executável.
-# Usamos 'package' e '-DskipTests' para um build mais rápido e focado.
-RUN mvn clean package -DskipTests
+# Executa o build do Gradle para gerar o arquivo .jar executável.
+# '-x test' pula os testes para um build mais rápido.
+# '--no-daemon' é uma boa prática para ambientes de CI/CD como o Docker.
+RUN ./gradlew build -x test --no-daemon
 
 # --- Estágio 2: Final ---
 # Usamos a imagem JRE Alpine, que é extremamente leve e ideal para produção.
@@ -49,10 +51,9 @@ WORKDIR /app
 EXPOSE 8080
 
 # Copia APENAS o arquivo .jar gerado no estágio de build.
-# O caminho padrão do Maven é 'target/'. Usamos um curinga (*) para não depender da versão.
+# O caminho padrão do Gradle é 'build/libs/'. Usamos um curinga (*) para não depender do nome/versão.
 # O JAR é renomeado para 'app.jar' para simplificar o comando ENTRYPOINT.
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
 
 # Define o comando para executar a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]
-
