@@ -28,9 +28,9 @@ WORKDIR /home/gradle/src
 
 # Copia os arquivos de configuração do Gradle e o wrapper para aproveitar o cache.
 # As dependências só serão baixadas novamente se esses arquivos mudarem.
-COPY build.gradle settings.gradle ./
-COPY gradlew ./
-COPY gradle ./gradle
+COPY coup-server/build.gradle coup-server/settings.gradle ./
+COPY coup-server/gradlew ./
+COPY coup-server/gradle ./gradle
 
 # Copia o resto do código-fonte do projeto
 COPY coup-server/src ./src
