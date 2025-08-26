@@ -6,7 +6,7 @@ RUN apt-get update
 
 RUN curl -s "https://get.sdkman.io" | bash
 
-RUN source "$HOME/.sdkman/bin/sdkman-init.sh"
+#RUN source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 RUN sdk install java 21.0.7-oracle -y
 
