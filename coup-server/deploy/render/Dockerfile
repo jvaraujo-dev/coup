@@ -2,17 +2,21 @@ FROM ubuntu:latest AS build
 
 RUN apt-get update
 
+RUN apt-get install temurin-21-jdk=21.0.2+13-1
+
 #RUN apt install curl
 
-RUN curl -s "https://get.sdkman.io" | bash
-
+#RUN curl -s "https://get.sdkman.io" | bash
+#
 #RUN source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-RUN sdk install java 21.0.7-oracle -y
+#RUN sdk install java 21.0.7-oracle -y
 
 COPY . .
 
-RUN ./gradlew clean build
+RUN apt-get install maven -y
+
+RUN mvn clean install
 
 FROM eclipse-temurin:21-jre-alpine
 
