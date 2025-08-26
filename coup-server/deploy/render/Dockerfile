@@ -32,7 +32,7 @@ COPY pom.xml .
 RUN mvn dependency:go-offline
 
 # Copia o resto do código-fonte do projeto
-COPY src ./src
+COPY coup-server/src ./src
 
 # Executa o build do Maven para gerar o arquivo .jar executável.
 # Usamos 'package' e '-DskipTests' para um build mais rápido e focado.
