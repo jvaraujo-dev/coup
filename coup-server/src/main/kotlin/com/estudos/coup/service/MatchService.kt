@@ -1,4 +1,4 @@
-package com.estudos.coup.services
+package com.estudos.coup.service
 
 import com.estudos.coup.controller.response.RoomResponse
 import com.estudos.coup.model.CardType
@@ -15,8 +15,14 @@ import kotlin.random.Random
 @Service
 class MatchService(private val roomRepository: RoomRepository, private val playerRepository: PlayerRepository) {
     fun createRoom(roomName: String, players: MutableList<Player> = mutableListOf()): Room {
-        val newRoom = Room(roomName = roomName, player = players)
+        val newRoom = Room(roomName = roomName)
         roomRepository.save(newRoom)
+
+        if (players.isNotEmpty()) {
+            players.forEach {
+                player -> enterMatchRoom(roomToken = newRoom.token, playerName = player.playerName)
+            }
+        }
         return newRoom
     }
 
@@ -28,17 +34,17 @@ class MatchService(private val roomRepository: RoomRepository, private val playe
         return addPlayerToRoom(room, player).toRoomResponse()
     }
 
+    fun findRoom(roomId: String): RoomResponse{
+        return roomRepository.findById(roomId).get().toRoomResponse()
+    }
+
     private fun provideRandomCards(cardsAmount: Int, player: Player){
         val allCardTypes = CardType.entries
         repeat(cardsAmount){
             player.cards.add(allCardTypes.random(Random))
         }
     }
-    fun findRoom(roomId: String): RoomResponse{
-        return roomRepository.findById(roomId).get().toRoomResponse()
-    }
 
-    @Transactional
     private fun addPlayerToRoom(room: Room, playerToAdd: Player): Room{
         if (!(room.player.contains(playerToAdd))) {
             playerToAdd.room = room

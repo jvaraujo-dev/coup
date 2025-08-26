@@ -1,10 +1,8 @@
 package com.estudos.coup.controller
 
 import com.estudos.coup.controller.response.RoomResponse
-import com.estudos.coup.services.MatchService
-import io.mockk.Runs
+import com.estudos.coup.service.MatchService
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +34,7 @@ class MatchControllerTests {
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
 
         controller.stateRoom(tokenRoom)
-        verify { simpMessagingTemplate.convertAndSend(any(), eq(room)) }
+        verify { simpMessagingTemplate.convertAndSend("/topic/state-room/${room.token}", eq(room)) }
     }
 
     @Test
@@ -51,7 +49,7 @@ class MatchControllerTests {
 
         controller.stateRoom(tokenRoom)
 
-        verify { simpMessagingTemplate.convertAndSend(any(), eq(room)) }
+        verify { simpMessagingTemplate.convertAndSend("/topic/state-room/${room.token}", eq(room)) }
     }
 
     @Test

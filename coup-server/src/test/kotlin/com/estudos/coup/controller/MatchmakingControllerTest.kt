@@ -3,7 +3,7 @@ package com.estudos.coup.controller
 import com.estudos.coup.controller.request.RoomRequest
 import com.estudos.coup.model.Player
 import com.estudos.coup.model.Room
-import com.estudos.coup.services.MatchService
+import com.estudos.coup.service.MatchService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import kotlin.test.assertEquals
 
 class MatchmakingControllerTest {
 
@@ -34,8 +35,11 @@ class MatchmakingControllerTest {
 
         every { matchService.createRoom(any()) } returns room
 
-        matchmakingController.createRoom(roomRequest)
+        val controllerResponse = matchmakingController.createRoom(roomRequest)
 
+        assertEquals(room.player.toString(),controllerResponse.players)
+        assertEquals(room.roomName,controllerResponse.roomName)
+        assertEquals(room.token,controllerResponse.token)
         verify(exactly = 1) { matchService.createRoom(roomName = roomRequest.roomName) }
     }
 
@@ -48,8 +52,11 @@ class MatchmakingControllerTest {
 
         every { matchService.createRoom(any()) } returns room
 
-        matchmakingController.createRoom(roomRequest)
+        val controllerResponse = matchmakingController.createRoom(roomRequest)
 
+        assertEquals(room.player.toString(),controllerResponse.players)
+        assertEquals(room.roomName,controllerResponse.roomName)
+        assertEquals(room.token,controllerResponse.token)
         verify(exactly = 1) { matchService.createRoom(roomName = roomRequest.roomName) }
     }
 

@@ -1,7 +1,7 @@
 package com.estudos.coup.controller
 
 import com.estudos.coup.controller.response.RoomResponse
-import com.estudos.coup.services.MatchService
+import com.estudos.coup.service.MatchService
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
