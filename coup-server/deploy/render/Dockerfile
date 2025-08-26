@@ -1,27 +1,58 @@
-FROM ubuntu:latest AS build
-
-RUN apt-get update
-
-RUN apt-get install temurin-21-jdk=21.0.2+13-1
-
-#RUN apt install curl
-
-#RUN curl -s "https://get.sdkman.io" | bash
+#FROM ubuntu:latest AS build
 #
-#RUN source "$HOME/.sdkman/bin/sdkman-init.sh"
+#RUN apt-get update
+#
+#RUN apt install temurin-21-jdk=21.0.2+13-1
+#
+#COPY . .
+#
+#RUN apt-get install maven -y
+#
+#RUN mvn clean install
+#
+#FROM eclipse-temurin:21-jre-alpine
+#
+#EXPOSE 8080
+#
+#COPY --from=build /build/libs/coup-0.0.1-SNAPSHOT-plain.jar coup.jar
+#
+#ENTRYPOINT ["java", "-jar", "coup.jar"]
 
-#RUN sdk install java 21.0.7-oracle -y
+# --- Estágio 1: Build ---
+# Usamos uma imagem oficial do Maven que já inclui o JDK 21 (Temurin).
+# Isso é muito mais eficiente e confiável do que instalar tudo numa imagem base do Ubuntu.
+FROM maven:3.9-eclipse-temurin-21 AS build
 
-COPY . .
+# Define o diretório de trabalho dentro do contêiner
+WORKDIR /app
 
-RUN apt-get install maven -y
+# Copia primeiro o pom.xml para aproveitar o cache de camadas do Docker.
+# As dependências só serão baixadas novamente se o pom.xml mudar.
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-RUN mvn clean install
+# Copia o resto do código-fonte do projeto
+COPY src ./src
 
+# Executa o build do Maven para gerar o arquivo .jar executável.
+# Usamos 'package' e '-DskipTests' para um build mais rápido e focado.
+RUN mvn clean package -DskipTests
+
+# --- Estágio 2: Final ---
+# Usamos a imagem JRE Alpine, que é extremamente leve e ideal para produção.
 FROM eclipse-temurin:21-jre-alpine
 
+# Define o diretório de trabalho
+WORKDIR /app
+
+# Expõe a porta que a aplicação Spring Boot usa por padrão
 EXPOSE 8080
 
-COPY --from=build /build/libs/coup-0.0.1-SNAPSHOT-plain.jar coup.jar
+# Copia APENAS o arquivo .jar gerado no estágio de build.
+# O caminho padrão do Maven é 'target/'. Usamos um curinga (*) para não depender da versão.
+# O JAR é renomeado para 'app.jar' para simplificar o comando ENTRYPOINT.
+COPY --from=build /app/target/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "coup.jar"]
+# Define o comando para executar a aplicação
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
