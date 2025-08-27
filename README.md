@@ -4,7 +4,7 @@ Coup is a project developed for study purposes, where I apply various programmin
 
 ### About the game
 
-This project implements the "Coup" card game, focusing on backend logic and real-time interaction via WebSockets. It aims to simulate the dynamics of a game of intrigue and bluff.
+This project implements the "Coup" card game, focusing on backend logic and real-time interaction with WebSockets. It aims to simulate the dynamics of a game of intrigue and bluff.
 
 ## Building and Running with Docker
 
