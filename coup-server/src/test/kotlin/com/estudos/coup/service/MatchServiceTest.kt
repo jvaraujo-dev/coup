@@ -8,6 +8,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -40,10 +41,12 @@ class MatchServiceTest {
         every { roomRepository.findById(any()) } returns Optional.of(room)
         every { roomRepository.save(any())} returns room
         every { playerRepository.findById(any()) } returns Optional.empty()
-        every { playerRepository.save(expectedPlayers[0]) } returns expectedPlayers[0]
-        every { playerRepository.save(expectedPlayers[1]) } returns expectedPlayers[1]
+        every { playerRepository.save(any()) } answers { invocation.args[0] as Player }
+//        every { playerRepository.save(expectedPlayers[0]) } returns expectedPlayers[0]
+//        every { playerRepository.save(expectedPlayers[1]) } returns expectedPlayers[1]
 
         matchService.createRoom(roomName, expectedPlayers)
+//        verify(exactly = 2) { playerRepository.save(any()) }
     }
 
     companion object {
