@@ -4,6 +4,7 @@ import com.estudos.coup.model.Player
 import com.estudos.coup.model.Room
 import com.estudos.coup.repository.PlayerRepository
 import com.estudos.coup.repository.RoomRepository
+import com.estudos.coup.services.MatchService
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
 import java.util.Optional
 import kotlin.collections.mutableListOf
