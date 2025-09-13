@@ -20,7 +20,8 @@ class MatchController(private val matchService: MatchService, private val simpMe
     fun joinGame(@DestinationVariable roomToken: String, @Payload request: String){
         println("Player '$request' attempting to join room '$roomToken'")
 
-        matchService.enterMatchRoom(roomToken = roomToken, playerName = request)
+        val updatedRoom = matchService.enterMatchRoom(roomToken = roomToken, playerName = request)
+        publishRoomState(updatedRoom)
     }
 
     private fun publishRoomState(room: RoomResponse){

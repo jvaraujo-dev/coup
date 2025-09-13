@@ -1,22 +1,25 @@
 package com.estudos.coup.service
 
+import com.estudos.coup.controller.request.RoomRequest
+import com.estudos.coup.model.CardType
 import com.estudos.coup.model.Player
 import com.estudos.coup.model.Room
+import com.estudos.coup.model.toRoomResponse
 import com.estudos.coup.repository.PlayerRepository
 import com.estudos.coup.repository.RoomRepository
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.api.Test
 import java.util.Optional
-import kotlin.collections.mutableListOf
+import kotlin.test.assertEquals
 
 class MatchServiceTest {
 
     lateinit var roomRepository: RoomRepository
     lateinit var playerRepository: PlayerRepository
+    lateinit var cardsService: CardsService
 
     lateinit var matchService: MatchService
 
@@ -24,33 +27,93 @@ class MatchServiceTest {
     fun setUp() {
         roomRepository = mockk()
         playerRepository = mockk()
+        cardsService = mockk()
 
-        matchService = MatchService(roomRepository, playerRepository)
+        matchService = MatchService(roomRepository, playerRepository, cardsService)
     }
 
-    @ParameterizedTest
-    @MethodSource("providePlayers")
-    fun shouldCreateRoomWithAListOfNewPlayers(expectedPlayers: MutableList<Player>) {
+    @Test
+    fun `should create and save a room`() {
         val roomName = "Test Room"
-        val room = Room(roomName = roomName, player = expectedPlayers)
+        val roomToSave = Room(roomName = roomName)
+        val roomRequest = RoomRequest(roomName = roomName)
+
+        every { roomRepository.save(any())} returns roomToSave
+
+        val result = matchService.createRoom(roomRequest)
+
+        verify(exactly = 0) { playerRepository.save(any()) }
+        verify(exactly = 1) { roomRepository.save(any()) }
+
+        assertEquals(roomToSave, result)
+    }
+
+    @Test
+    fun `should enter an existing room`() {
+        val roomName = "Test Room"
+        val player = Player(playerName = "Test")
+        val room = Room(roomName = roomName, player = mutableListOf())
+        val expectedPlayer = Player(playerId = player.playerId, playerName = player.playerName, cards = mutableListOf(
+            CardType.CAPITAO, CardType.CONDESSA), room = room)
+        val expectedRoom = Room(token = room.token, roomName = room.roomName, player = mutableListOf(expectedPlayer)).toRoomResponse()
 
         every { roomRepository.findById(any()) } returns Optional.of(room)
         every { roomRepository.save(any())} returns room
-        every { playerRepository.findById(any()) } returns Optional.empty()
-        every { playerRepository.save(any()) } answers { invocation.args[0] as Player }
-//        every { playerRepository.save(expectedPlayers[0]) } returns expectedPlayers[0]
-//        every { playerRepository.save(expectedPlayers[1]) } returns expectedPlayers[1]
+        every { playerRepository.save(any())} returns player
+        every { playerRepository.findById(any())} returns Optional.empty()
+        every { cardsService.provideRandomCards(any(), any()) } returns expectedPlayer
 
-        matchService.createRoom(roomName, expectedPlayers)
-//        verify(exactly = 2) { playerRepository.save(any()) }
+        val result = matchService.enterMatchRoom(roomToken = room.token, playerName = player.playerName)
+
+        verify(exactly = 1) { roomRepository.save(any()) }
+        verify(exactly = 1) { playerRepository.save(any()) }
+
+        assertEquals(expectedRoom.players, result.players)
+        assertEquals(expectedRoom.token, result.token)
+        assertEquals(expectedRoom.roomName, result.roomName)
     }
 
-    companion object {
-        @JvmStatic
-        fun providePlayers(): List<Arguments>{
-            return listOf(
-                Arguments.of(mutableListOf(Player(playerName = "Player 1"), Player(playerName = "Player 2"))),
-            )
-        }
+    @Test
+    fun `should not enter if the player already in room`() {
+        val roomName = "Test Room"
+        val player = Player(playerName = "Test", cards = mutableListOf(CardType.CAPITAO, CardType.CONDESSA))
+        val room = Room(roomName = roomName, player = mutableListOf(player))
+        val expectedPlayer = Player(playerId = player.playerId, playerName = player.playerName, cards = mutableListOf(
+            CardType.CAPITAO, CardType.CONDESSA), room = room)
+        val expectedRoom = Room(token = room.token, roomName = room.roomName, player = mutableListOf(expectedPlayer))
+
+        every { roomRepository.findById(any()) } returns Optional.of(expectedRoom)
+        every { roomRepository.save(any())} returns expectedRoom
+        every { playerRepository.save(any())} returns player
+        every { playerRepository.findById(any())} returns Optional.of(expectedPlayer)
+        every { cardsService.provideRandomCards(any(), any()) } returns expectedPlayer
+
+        val result = matchService.enterMatchRoom(roomToken = room.token, playerName = player.playerName)
+
+        verify(exactly = 1) { roomRepository.save(any()) }
+        verify(exactly = 1) { playerRepository.save(any()) }
+
+        val roomAssert = expectedRoom.toRoomResponse()
+
+        assertEquals(roomAssert.players, result.players)
+        assertEquals(roomAssert.token, result.token)
+        assertEquals(roomAssert.roomName, result.roomName)
+    }
+
+    @Test
+    fun `should find an existing room`() {
+        val roomName = "Test Room"
+        val room = Room(roomName = roomName)
+        val expectedRoom = room.toRoomResponse()
+
+        every { roomRepository.findById(any()) } returns Optional.of(room)
+
+        val result = matchService.findRoom(roomId = room.token)
+
+        verify(exactly = 1) { roomRepository.findById(any()) }
+
+        assertEquals(expectedRoom.token, result.token)
+        assertEquals(expectedRoom.roomName, result.roomName)
+        assertEquals(expectedRoom.players, result.players)
     }
 }

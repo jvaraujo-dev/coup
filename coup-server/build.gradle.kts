@@ -24,11 +24,15 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:latest.release")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
 	runtimeOnly("com.h2database:h2")
+
 	implementation(kotlin("stdlib-jdk8"))
 }
 
@@ -63,6 +67,9 @@ tasks.jacocoTestReport {
 				"**/exception/**",
 				"**/dto/**",
 				"**/CoupApplication*.class",
+                "**/request/**",
+                "**/response/**",
+                "**/repository/**"
 			)
 		}
 	)
@@ -73,7 +80,7 @@ tasks.jacocoTestCoverageVerification {
 		rule {
 			limit {
 				// TODO: increase minimum coverage when test are implemented
-				minimum = "0.1".toBigDecimal()
+				minimum = "0.7".toBigDecimal()
 			}
 		}
 	}

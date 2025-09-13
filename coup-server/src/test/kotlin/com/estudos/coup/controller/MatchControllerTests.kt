@@ -61,6 +61,7 @@ class MatchControllerTests {
         val room = RoomResponse(tokenRoom, roomName, players)
 
         every { matchService.enterMatchRoom(any(),any()) } returns room
+        every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
 
         controller.joinGame(tokenRoom, playerName)
 

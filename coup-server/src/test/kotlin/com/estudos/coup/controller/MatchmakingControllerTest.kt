@@ -30,7 +30,7 @@ class MatchmakingControllerTest {
     @Test
     fun shouldCreateARoomWithoutPlayers() {
         val roomName = "Test room name"
-        val roomRequest = RoomRequest(roomName = roomName, players = null)
+        val roomRequest = RoomRequest(roomName = roomName)
         val room = Room(roomName = roomName)
 
         every { matchService.createRoom(any()) } returns room
@@ -40,34 +40,6 @@ class MatchmakingControllerTest {
         assertEquals(room.player.toString(),controllerResponse.players)
         assertEquals(room.roomName,controllerResponse.roomName)
         assertEquals(room.token,controllerResponse.token)
-        verify(exactly = 1) { matchService.createRoom(roomName = roomRequest.roomName) }
-    }
-
-    @ParameterizedTest
-    @MethodSource("playersProvider")
-    fun shouldCreateARoomWithVariousPlayers(players: MutableList<Player>) {
-        val roomName = "Test room name"
-        val roomRequest = RoomRequest(roomName = roomName, players = players)
-        val room = Room(roomName = roomName, player = players)
-
-        every { matchService.createRoom(any()) } returns room
-
-        val controllerResponse = matchmakingController.createRoom(roomRequest)
-
-        assertEquals(room.player.toString(),controllerResponse.players)
-        assertEquals(room.roomName,controllerResponse.roomName)
-        assertEquals(room.token,controllerResponse.token)
-        verify(exactly = 1) { matchService.createRoom(roomName = roomRequest.roomName) }
-    }
-
-    companion object {
-        @JvmStatic
-        fun playersProvider(): List<Arguments> {
-            return listOf(
-                Arguments.of(listOf(Player(playerName = "Player 1"))),
-                Arguments.of(listOf(Player(playerName = "Player 1"), Player(playerName = "Player 2"))),
-                Arguments.of(listOf(Player(playerName = "Player 1"), Player(playerName = "Player 2"), Player(playerName = "Player 3")))
-            )
-        }
+        verify(exactly = 1) { matchService.createRoom(roomParameters = roomRequest) }
     }
 }
