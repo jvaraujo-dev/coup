@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@CrossOrigin(origins = [$$"${ALLOWED_ORIGINS}"])
+@CrossOrigin(origins = [$$"${cors.allowed-origins}"])
 class MatchmakingController(
     private val matchService: MatchService
 ) {

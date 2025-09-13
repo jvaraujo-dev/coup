@@ -11,7 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig : WebSocketMessageBrokerConfigurer {
-    @Value($$"${ALLOWED_ORIGINS}") private lateinit var allowedOrigins: String
+    @Value($$"${cors.allowed-origins}") private lateinit var allowedOrigins: String
 
     override fun configureMessageBroker(config: MessageBrokerRegistry) {
         config.enableSimpleBroker("/topic")
