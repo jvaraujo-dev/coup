@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
 	kotlin("jvm") version "2.2.0"
 	kotlin("plugin.spring") version "2.2.0"
@@ -88,4 +90,12 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.check {
 	dependsOn(tasks.jacocoTestCoverageVerification)
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(
+        listOf(
+            "-Xannotation-default-target=param-property"
+        )
+    )
 }
