@@ -5,6 +5,10 @@ Coup is a project developed for study purposes, where I apply various programmin
 ### About the game
 
 This project implements the "Coup" card game, focusing on backend logic and real-time interaction with WebSockets. It aims to simulate the dynamics of a game of intrigue and bluff.
+You can access the game by the link:
+```
+https://coup-delta.vercel.app/
+```
 
 ## Building and Running with Docker
 
