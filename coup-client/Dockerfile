@@ -10,7 +10,7 @@ ENV NEXT_PUBLIC_BACKEND_HTTP_URL=$NEXT_PUBLIC_BACKEND_HTTP_URL
 
 COPY package.json yarn.lock* package-lock.json* ./
 
-RUN npm install
+RUN npm install --verbose
 
 COPY src ./src
 COPY public ./public
