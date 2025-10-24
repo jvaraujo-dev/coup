@@ -8,8 +8,6 @@ import kotlin.random.Random
 @Service
 class CardsService {
 
-    lateinit var cardsService: CardsService
-
     fun provideRandomCards(cardsAmount: Int, player: Player): Player{
         val allCardTypes = CardType.entries
         repeat(cardsAmount){

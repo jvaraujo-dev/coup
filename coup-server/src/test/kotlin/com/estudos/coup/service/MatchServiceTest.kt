@@ -12,7 +12,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.Optional
+import java.util.*
 import kotlin.test.assertEquals
 
 class MatchServiceTest {
@@ -55,7 +55,8 @@ class MatchServiceTest {
         val room = Room(roomName = roomName, player = mutableListOf())
         val expectedPlayer = Player(playerId = player.playerId, playerName = player.playerName, cards = mutableListOf(
             CardType.CAPITAO, CardType.CONDESSA), room = room)
-        val expectedRoom = Room(token = room.token, roomName = room.roomName, player = mutableListOf(expectedPlayer)).toRoomResponse()
+        val expectedRoom = Room(token = room.token, roomName = room.roomName, player = mutableListOf(expectedPlayer))
+            .toRoomResponse()
 
         every { roomRepository.findById(any()) } returns Optional.of(room)
         every { roomRepository.save(any())} returns room
