@@ -40,7 +40,6 @@ coup-client/next-env.d.ts
 /.gradle/
 /target/ # Para projetos Maven, mas pode ser útil
 
-coup-client/package-lock.json
 /yarn.lock
 
 HELP.md
