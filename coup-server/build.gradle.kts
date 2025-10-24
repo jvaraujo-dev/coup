@@ -33,7 +33,7 @@ dependencies {
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.0.21")
     testImplementation("io.mockk:mockk:1.14.6")
 
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.0")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.2")
 
 	runtimeOnly("com.h2database:h2:2.4.240")
 
