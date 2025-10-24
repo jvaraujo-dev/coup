@@ -93,7 +93,7 @@ tasks.jacocoTestReport {
 	}
 
 	classDirectories.setFrom(
-		fileTree( layout.buildDirectory.dir("/classes/kotlin/main")).apply {
+		fileTree( layout.buildDirectory.dir("classes/kotlin/main")).apply {
 			exclude(
 				"**/config/**",
 				"**/model/**",
@@ -102,7 +102,8 @@ tasks.jacocoTestReport {
 				"**/CoupApplication*.class",
                 "**/request/**",
                 "**/response/**",
-                "**/repository/**"
+                "**/repository/**",
+                "**/resources/**"
 			)
 		}
 	)
@@ -113,7 +114,7 @@ tasks.jacocoTestCoverageVerification {
 		rule {
 			limit {
 				// TODO: increase minimum coverage when test are implemented
-				minimum = "0.7".toBigDecimal()
+				minimum = "0.9".toBigDecimal()
 			}
 		}
 	}
