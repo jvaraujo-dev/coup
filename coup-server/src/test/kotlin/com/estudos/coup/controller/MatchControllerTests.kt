@@ -34,14 +34,20 @@ class MatchControllerTests {
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
 
         controller.stateRoom(tokenRoom)
-        verify { simpMessagingTemplate.convertAndSend("/topic/state-room/${room.token}", eq(room)) }
+        verify { simpMessagingTemplate.convertAndSend(
+            "/topic/state-room/${room.token}",
+            eq(room)) }
     }
 
     @Test
     fun shouldPublishRoomStateWithValidPlayers(){
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
-        val players = "[Player(playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, playerName=Player 1, cards=[ASSASSINO, EMBAIXADOR], room=Room(roomName=$roomName, token=$tokenRoom))]"
+        val players = "[Player(" +
+                "playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, " +
+                "playerName=Player 1, " +
+                "cards=[ASSASSINO, EMBAIXADOR], " +
+                "room=Room(roomName=$roomName, token=$tokenRoom))]"
         val room = RoomResponse(tokenRoom, roomName, players)
 
         every { matchService.findRoom(any()) } returns room
@@ -49,7 +55,9 @@ class MatchControllerTests {
 
         controller.stateRoom(tokenRoom)
 
-        verify { simpMessagingTemplate.convertAndSend("/topic/state-room/${room.token}", eq(room)) }
+        verify { simpMessagingTemplate.convertAndSend(
+            "/topic/state-room/${room.token}",
+            eq(room)) }
     }
 
     @Test
@@ -57,7 +65,11 @@ class MatchControllerTests {
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val playerName = "Player 1"
-        val players = "[Player(playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, playerName=Player 1, cards=[ASSASSINO, EMBAIXADOR], room=Room(roomName=$roomName, token=$tokenRoom))]"
+        val players = "[Player(" +
+                "playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, " +
+                "playerName=Player 1, " +
+                "cards=[ASSASSINO, EMBAIXADOR], " +
+                "room=Room(roomName=$roomName, token=$tokenRoom))]"
         val room = RoomResponse(tokenRoom, roomName, players)
 
         every { matchService.enterMatchRoom(any(),any()) } returns room

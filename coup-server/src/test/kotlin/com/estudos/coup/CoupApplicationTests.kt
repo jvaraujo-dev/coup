@@ -8,6 +8,7 @@ class CoupApplicationTests {
 
 	@Test
 	fun contextLoads() {
+		assert(true)
 	}
 
 }

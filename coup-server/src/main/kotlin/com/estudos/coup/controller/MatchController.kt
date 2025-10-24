@@ -9,7 +9,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 
 @Controller
-class MatchController(private val matchService: MatchService, private val simpMessagingTemplate: SimpMessagingTemplate) {
+class MatchController(private val matchService: MatchService,
+                      private val simpMessagingTemplate: SimpMessagingTemplate) {
     @MessageMapping("/state-game")
     fun stateRoom(@Payload roomToken: String){
         val room = matchService.findRoom(roomToken)
