@@ -2,11 +2,11 @@ FROM gradle:8-jdk21 AS build
 
 WORKDIR /home/gradle/src
 
-COPY coup-server/build.gradle.kts coup-server/settings.gradle.kts ./
-COPY coup-server/gradlew ./
-COPY coup-server/gradle ./gradle
+COPY coup-backend/build.gradle.kts coup-backend/settings.gradle.kts ./
+COPY coup-backend/gradlew ./
+COPY coup-backend/gradle ./gradle
 
-COPY coup-server/src ./src
+COPY coup-backend/src ./src
 
 RUN ./gradlew build -x test --no-daemon
 
