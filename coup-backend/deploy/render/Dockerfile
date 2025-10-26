@@ -5,6 +5,7 @@ WORKDIR /home/gradle/src
 COPY coup-backend/build.gradle.kts coup-backend/settings.gradle.kts ./
 COPY coup-backend/gradlew ./
 COPY coup-backend/gradle ./gradle
+COPY coup-backend/config ./config
 
 COPY coup-backend/src ./src
 
