@@ -9,7 +9,8 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                                                      setPlayerNameInput,
                                                      handleJoinGame,
                                                      handleLeaveRoom,
-                                                 }) => {
+                                                     handleStartGame
+}) => {
 
     let playersTableRows;
 
@@ -55,6 +56,10 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                 />
                 <button onClick={handleJoinGame} className="btn btn-success" style={{ marginLeft: '10px' }}>
                     Entrar no Jogo
+                </button>
+
+                <button onClick={handleStartGame} className="btn btn-success" style={{ marginLeft: '10px' }}>
+                    Iniciar Jogo
                 </button>
             </div>
 

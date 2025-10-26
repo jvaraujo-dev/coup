@@ -22,4 +22,5 @@ export interface RoomDetailsProps {
     setPlayerNameInput: (name: string) => void;
     handleJoinGame: () => void;
     handleLeaveRoom: () => void;
+    handleStartGame: () => void;
 }

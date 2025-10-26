@@ -40,6 +40,6 @@ fun Player.toPlayerResponse(): PlayerResponse{
         playerId = this.playerId,
         playerName = this.playerName,
         cards = this.cards.toString(),
-        room = this.room?.roomName ?: ""
+        room = this.room?.name ?: ""
     )
 }

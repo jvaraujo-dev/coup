@@ -16,30 +16,34 @@ data class Room(
     @Id
     @Column(name = "room_id")
     val token: String = UUID.randomUUID().toString(),
-    val roomName: String,
+    val name: String,
 
     @Enumerated(EnumType.STRING)
-    val roomState: StateRoom = StateRoom.WAITING_PLAYERS,
+    var state: StateRoom = StateRoom.WAITING_PLAYERS,
 
     @OneToMany(mappedBy = "room",fetch = FetchType.EAGER, cascade = [CascadeType.PERSIST])
     var player: MutableList<Player> = mutableListOf()
 ){
     constructor() : this(
         token = UUID.randomUUID().toString(),
-        roomName = "",
-        roomState = StateRoom.WAITING_PLAYERS,
+        name = "",
+        state = StateRoom.WAITING_PLAYERS,
         player = mutableListOf()
     )
 
     override fun toString(): String {
-        return "Room(roomName='$roomName', token='$token')"
+        return "Room(roomName='$name', token='$token')"
+    }
+
+    fun setRoomState(stateRoom: StateRoom){
+        this.state = stateRoom
     }
 }
 fun Room.toRoomResponse(): RoomResponse{
     return RoomResponse(
-        roomName = this.roomName,
+        roomName = this.name,
         token = this.token,
         players = this.player.toString(),
-        stateRoom = this.roomState.description
+        stateRoom = this.state.description
     )
 }

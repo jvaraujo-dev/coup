@@ -35,7 +35,7 @@ class MatchServiceTest {
     @Test
     fun `should create and save a room`() {
         val roomName = "Test Room"
-        val roomToSave = Room(roomName = roomName)
+        val roomToSave = Room(name = roomName)
         val roomRequest = RoomRequest(roomName = roomName)
 
         every { roomRepository.save(any())} returns roomToSave
@@ -52,10 +52,10 @@ class MatchServiceTest {
     fun `should enter an existing room`() {
         val roomName = "Test Room"
         val player = Player(playerName = "Test")
-        val room = Room(roomName = roomName, player = mutableListOf())
+        val room = Room(name = roomName, player = mutableListOf())
         val expectedPlayer = Player(playerId = player.playerId, playerName = player.playerName, cards = mutableListOf(
             CardType.CAPITAO, CardType.CONDESSA), room = room)
-        val expectedRoom = Room(token = room.token, roomName = room.roomName, player = mutableListOf(expectedPlayer))
+        val expectedRoom = Room(token = room.token, name = room.name, player = mutableListOf(expectedPlayer))
             .toRoomResponse()
 
         every { roomRepository.findById(any()) } returns Optional.of(room)
@@ -78,10 +78,10 @@ class MatchServiceTest {
     fun `should not enter if the player already in room`() {
         val roomName = "Test Room"
         val player = Player(playerName = "Test", cards = mutableListOf(CardType.CAPITAO, CardType.CONDESSA))
-        val room = Room(roomName = roomName, player = mutableListOf(player))
+        val room = Room(name = roomName, player = mutableListOf(player))
         val expectedPlayer = Player(playerId = player.playerId, playerName = player.playerName, cards = mutableListOf(
             CardType.CAPITAO, CardType.CONDESSA), room = room)
-        val expectedRoom = Room(token = room.token, roomName = room.roomName, player = mutableListOf(expectedPlayer))
+        val expectedRoom = Room(token = room.token, name = room.name, player = mutableListOf(expectedPlayer))
 
         every { roomRepository.findById(any()) } returns Optional.of(expectedRoom)
         every { roomRepository.save(any())} returns expectedRoom
@@ -104,7 +104,7 @@ class MatchServiceTest {
     @Test
     fun `should find an existing room`() {
         val roomName = "Test Room"
-        val room = Room(roomName = roomName)
+        val room = Room(name = roomName)
         val expectedRoom = room.toRoomResponse()
 
         every { roomRepository.findById(any()) } returns Optional.of(room)

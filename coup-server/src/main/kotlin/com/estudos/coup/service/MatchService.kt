@@ -4,6 +4,7 @@ import com.estudos.coup.controller.request.RoomRequest
 import com.estudos.coup.controller.response.RoomResponse
 import com.estudos.coup.model.Player
 import com.estudos.coup.model.Room
+import com.estudos.coup.model.StateRoom
 import com.estudos.coup.model.toRoomResponse
 import com.estudos.coup.repository.PlayerRepository
 import com.estudos.coup.repository.RoomRepository
@@ -17,7 +18,7 @@ class MatchService(
     private val cardsService: CardsService) {
 
 fun createRoom(roomParameters: RoomRequest): Room {
-        val newRoom = Room(roomName = roomParameters.roomName)
+        val newRoom = Room(name = roomParameters.roomName)
         return roomRepository.save(newRoom)
     }
 
@@ -30,9 +31,12 @@ fun createRoom(roomParameters: RoomRequest): Room {
         return addPlayerToRoom(room, player).toRoomResponse()
     }
 
-//    fun startGame(roomToken: String): RoomResponse{
-//
-//    }
+    fun startGame(roomToken: String): RoomResponse{
+        val room = roomRepository.findById(roomToken).get()
+        val newRoom = Room(token = room.token, name = room.name, state = StateRoom.STARTED, player = room.player)
+        roomRepository.save(newRoom)
+        return newRoom.toRoomResponse()
+    }
 
     private fun addPlayerToRoom(room: Room, playerToAdd: Player): Room{
         if (!(room.player.contains(playerToAdd))) {

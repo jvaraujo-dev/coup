@@ -220,6 +220,19 @@ export default function CoupGamePage() {
     console.log(`Sent join-game request for player: ${playerNameInput} in room: ${currentToken}`);
   };
 
+  const handleStartGame = () => {
+
+      if (!stompClientRef.current || !stompClientRef.current.active) {
+          setMessage("Conexão WebSocket não está ativa. Tente novamente ou verifique a sala.");
+          setIsError(true);
+          return;
+      }
+
+      stompClientRef.current.publish({
+          destination: `/app/${roomToken}/start`
+      });
+  }
+
   // Handler para sair da sala e desconectar do WebSocket
   const handleLeaveRoom = () => {
     if (stompClientRef.current && stompClientRef.current.active) {
@@ -303,6 +316,7 @@ export default function CoupGamePage() {
                   setPlayerNameInput={setPlayerNameInput}
                   handleJoinGame={handleJoinGame}
                   handleLeaveRoom={handleLeaveRoom}
+                  handleStartGame={handleStartGame}
               />
           )}
 

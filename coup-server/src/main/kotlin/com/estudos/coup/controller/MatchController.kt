@@ -24,7 +24,7 @@ class MatchController(private val matchService: MatchService,
     }
 
     @MessageMapping("/{roomToken}/start")
-    fun startGame(@DestinationVariable roomToken: String, @Payload request: String){
+    fun startGame(@DestinationVariable roomToken: String){
         val updatedRoom = matchService.startGame(roomToken= roomToken)
         publishRoomState(updatedRoom)
     }
