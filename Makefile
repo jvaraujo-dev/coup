@@ -1,5 +1,5 @@
-BACKEND_DIR = coup-server
-FRONTEND_DIR = coup-client
+BACKEND_DIR = coup-backend
+FRONTEND_DIR = coup-frontend
 
 BACKEND_JAR_NAME = coup-0.0.1-SNAPSHOT.jar
 BACKEND_JAR_PATH = $(BACKEND_DIR)/build/libs/$(BACKEND_JAR_NAME)

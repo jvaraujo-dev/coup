@@ -1,13 +1,13 @@
 services:
   coup-backend:
-    build: ./coup-server
+    build: ./coup-backend
     container_name: coup_backend
     ports:
       - '8080:8080'
     restart: always
   coup-frontend:
     build:
-      context: ./coup-client
+      context: coup-frontend
       args:
         NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8080/room-websocket
         NEXT_PUBLIC_BACKEND_HTTP_URL: http://localhost:8080
