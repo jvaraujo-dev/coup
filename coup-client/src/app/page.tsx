@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import RoomDetails from './components/RoomDetails';
-import { PlayerState, RoomState } from './types'// Importe o novo componente RoomDetails
+import { PlayerState, Room } from './types'// Importe o novo componente RoomDetails
 
 
 export default function CoupGamePage() {
@@ -13,7 +13,7 @@ export default function CoupGamePage() {
   const [isError, setIsError] = useState<boolean>(false); // Indica se a mensagem é um erro
   const [roomToken, setRoomToken] = useState<string | null>(null); // Token da sala ativa, controla a renderização
   const [playerNameInput, setPlayerNameInput] = useState<string>(''); // Nome do jogador
-  const [roomState, setRoomState] = useState<RoomState | null>(null); // Estado da sala recebido via WebSocket
+  const [room, setRoom] = useState<Room | null>(null); // Estado da sala recebido via WebSocket
   const stompClientRef = useRef<Client | null>(null); // Referência para a instância do cliente STOMP
 
   const backendHttpUrl = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL || 'http://localhost:8080';
@@ -70,17 +70,18 @@ export default function CoupGamePage() {
         // Se inscreve ao tópico da sala para receber atualizações de estado
         client.subscribe(`/topic/state-room/${roomToken}`, (room) => {
           try {
-            const rawRoomState = JSON.parse(room.body);
-            const parsedPlayers = parsePlayersString(rawRoomState.players);
+            const rawRoom = JSON.parse(room.body);
+            const parsedPlayers = parsePlayersString(rawRoom.players);
 
-            setRoomState({
-              token: rawRoomState.token,
-              roomName: rawRoomState.roomName,
-              players: parsedPlayers,
+            setRoom({
+                token: rawRoom.token,
+                roomName: rawRoom.roomName,
+                roomState: rawRoom.roomState,
+                players: parsedPlayers,
             });
             console.log('Received and parsed room state:', {
-              token: rawRoomState.token,
-              roomName: rawRoomState.roomName,
+              token: rawRoom.token,
+              roomName: rawRoom.roomName,
               players: parsedPlayers,
             });
 
@@ -211,7 +212,7 @@ export default function CoupGamePage() {
 
     // Publica a mensagem para o backend com o nome do jogador
     stompClientRef.current.publish({
-      destination: `/app/join-game/${currentToken}`,
+      destination: `/app/${currentToken}/join-game`,
       body: playerNameInput,
     });
 
@@ -224,7 +225,7 @@ export default function CoupGamePage() {
       stompClientRef.current.deactivate();
     }
     setRoomToken(null); // Volta para a tela de criação/entrada de sala
-    setRoomState(null); // Limpa o estado da sala
+    setRoom(null); // Limpa o estado da sala
     setPlayerNameInput(''); // Limpa o nome do jogador
     setMessage('Você saiu da sala.');
     setIsError(false);
@@ -295,7 +296,7 @@ export default function CoupGamePage() {
           ) : (
               // Se há token da sala, renderiza o componente RoomDetails para mostrar os detalhes da sala
               <RoomDetails
-                  roomState={roomState}
+                  room={room}
                   roomToken={roomToken}
                   playerNameInput={playerNameInput}
                   setPlayerNameInput={setPlayerNameInput}

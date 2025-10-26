@@ -4,8 +4,7 @@ import React from 'react';
 import {PlayerState, RoomDetailsProps} from '../types'
 
 const RoomDetails: React.FC<RoomDetailsProps> = ({
-                                                     roomState,
-                                                     roomToken,
+                                                     room,
                                                      playerNameInput,
                                                      setPlayerNameInput,
                                                      handleJoinGame,
@@ -14,8 +13,8 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
 
     let playersTableRows;
 
-    if (roomState?.players && roomState.players.length > 0) {
-        playersTableRows = roomState.players.map((player: PlayerState) => {
+    if (room?.players && room.players.length > 0) {
+        playersTableRows = room.players.map((player: PlayerState) => {
             const cards = player.cards.toString().split(",").slice(0, 2)
             const cardsDisplay = player.cards.length > 0
                 ? cards.join(", ")
@@ -40,8 +39,9 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
 
     return (
         <>
-            <h2>Sala Atual: <span id="currentRoomToken">{roomState?.roomName || 'Carregando...'}</span></h2>
-            <p>Token da Sala: <strong>{roomToken}</strong></p>
+            <h2>Sala Atual: <span id="currentRoomToken">{room?.roomName || 'Carregando...'}</span></h2>
+            <p>Token da Sala: <strong>{room?.token}</strong></p>
+            <p>Estado da Sala: <strong>{room?.roomState}</strong></p>
 
             <div className="form-group" style={{ marginBottom: '20px' }}>
                 <label htmlFor="playerName">Seu Nome:</label>

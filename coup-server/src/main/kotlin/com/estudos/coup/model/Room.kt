@@ -4,6 +4,8 @@ import com.estudos.coup.controller.response.RoomResponse
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
@@ -16,12 +18,16 @@ data class Room(
     val token: String = UUID.randomUUID().toString(),
     val roomName: String,
 
+    @Enumerated(EnumType.STRING)
+    val roomState: StateRoom = StateRoom.WAITING_PLAYERS,
+
     @OneToMany(mappedBy = "room",fetch = FetchType.EAGER, cascade = [CascadeType.PERSIST])
     var player: MutableList<Player> = mutableListOf()
 ){
     constructor() : this(
         token = UUID.randomUUID().toString(),
         roomName = "",
+        roomState = StateRoom.WAITING_PLAYERS,
         player = mutableListOf()
     )
 
@@ -33,6 +39,7 @@ fun Room.toRoomResponse(): RoomResponse{
     return RoomResponse(
         roomName = this.roomName,
         token = this.token,
-        players = this.player.toString()
+        players = this.player.toString(),
+        stateRoom = this.roomState.toString()
     )
 }

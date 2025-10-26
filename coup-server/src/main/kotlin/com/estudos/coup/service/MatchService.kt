@@ -30,6 +30,10 @@ fun createRoom(roomParameters: RoomRequest): Room {
         return addPlayerToRoom(room, player).toRoomResponse()
     }
 
+//    fun startGame(roomToken: String): RoomResponse{
+//
+//    }
+
     private fun addPlayerToRoom(room: Room, playerToAdd: Player): Room{
         if (!(room.player.contains(playerToAdd))) {
             playerToAdd.room = room
