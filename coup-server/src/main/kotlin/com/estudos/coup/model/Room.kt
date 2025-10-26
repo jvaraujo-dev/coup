@@ -40,6 +40,6 @@ fun Room.toRoomResponse(): RoomResponse{
         roomName = this.roomName,
         token = this.token,
         players = this.player.toString(),
-        stateRoom = this.roomState.toString()
+        stateRoom = this.roomState.description
     )
 }

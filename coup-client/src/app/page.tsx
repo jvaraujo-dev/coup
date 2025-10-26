@@ -76,13 +76,14 @@ export default function CoupGamePage() {
             setRoom({
                 token: rawRoom.token,
                 roomName: rawRoom.roomName,
-                roomState: rawRoom.roomState,
+                stateRoom: rawRoom.stateRoom,
                 players: parsedPlayers,
             });
             console.log('Received and parsed room state:', {
-              token: rawRoom.token,
-              roomName: rawRoom.roomName,
-              players: parsedPlayers,
+                token: rawRoom.token,
+                roomName: rawRoom.roomName,
+                stateRoom: rawRoom.stateRoom,
+                players: parsedPlayers,
             });
 
           } catch (e) {

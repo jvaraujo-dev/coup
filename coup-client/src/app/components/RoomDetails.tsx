@@ -41,7 +41,7 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
         <>
             <h2>Sala Atual: <span id="currentRoomToken">{room?.roomName || 'Carregando...'}</span></h2>
             <p>Token da Sala: <strong>{room?.token}</strong></p>
-            <p>Estado da Sala: <strong>{room?.roomState}</strong></p>
+            <p>Estado da Sala: <strong>{room?.stateRoom}</strong></p>
 
             <div className="form-group" style={{ marginBottom: '20px' }}>
                 <label htmlFor="playerName">Seu Nome:</label>

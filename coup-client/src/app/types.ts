@@ -11,7 +11,7 @@ export interface PlayerState {
 export interface Room {
     token: string;
     roomName: string;
-    roomState: string;
+    stateRoom: string;
     players: PlayerState[];
 }
 
