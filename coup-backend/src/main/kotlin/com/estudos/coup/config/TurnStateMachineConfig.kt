@@ -10,7 +10,7 @@ import org.springframework.statemachine.config.builders.StateMachineTransitionCo
 
 @Configuration
 @EnableStateMachineFactory
-open class TurnStateMachineConfig() : EnumStateMachineConfigurerAdapter<TurnState, TurnEvent>() {
+open class TurnStateMachineConfig : EnumStateMachineConfigurerAdapter<TurnState, TurnEvent>() {
 
     override fun configure(states: StateMachineStateConfigurer<TurnState, TurnEvent>) {
         states

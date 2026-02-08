@@ -54,7 +54,7 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                     value={playerNameInput}
                     onChange={(e) => setPlayerNameInput(e.target.value)}
                 />
-                <button onClick={handleJoinGame} className="btn btn-success" style={{ marginLeft: '10px' }}>
+                <button onClick={handleJoinGame} className="btn btn-info" style={{ marginLeft: '10px' }}>
                     Entrar no Jogo
                 </button>
 
