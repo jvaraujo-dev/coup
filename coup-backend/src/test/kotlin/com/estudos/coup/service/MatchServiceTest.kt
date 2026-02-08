@@ -1,6 +1,7 @@
 package com.estudos.coup.service
 
 import com.estudos.coup.controller.request.RoomRequest
+import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.model.CardType
 import com.estudos.coup.model.Player
 import com.estudos.coup.model.Room
