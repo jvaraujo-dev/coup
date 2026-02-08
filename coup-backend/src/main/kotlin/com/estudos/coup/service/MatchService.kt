@@ -45,7 +45,7 @@ fun createRoom(roomParameters: RoomRequest): Room {
 
         }
 
-        println("Player with ID $playerToAdd is in Room ${room.token}.")
+//        println("Player with ID $playerToAdd is in Room ${room.token}.")
 
         playerRepository.save(playerToAdd)
 

@@ -28,6 +28,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter:3.5.6")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.5.6")
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.21")
+    implementation("org.springframework.statemachine:spring-statemachine-starter:4.0.1")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test:3.5.6")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.0.21")
@@ -112,7 +113,6 @@ tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				// TODO: increase minimum coverage when test are implemented
 				minimum = "0.7".toBigDecimal()
 			}
 		}
