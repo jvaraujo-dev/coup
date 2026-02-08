@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import RoomDetails from './components/RoomDetails';
-import { PlayerState, Room } from './types'// Importe o novo componente RoomDetails
+import { PlayerState, Room } from './types'
 
 
 export default function CoupGamePage() {
@@ -18,6 +18,15 @@ export default function CoupGamePage() {
 
   const backendHttpUrl = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL || 'http://localhost:8080';
   const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8080/room-websocket';
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 5000); // A mensagem some após 5 segundos
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   // Função auxiliar para analisar a string de jogadores recebida do backend
   const parsePlayersString = useCallback((playersString: string | null | undefined): PlayerState[] => {
@@ -328,13 +337,6 @@ export default function CoupGamePage() {
                   handleLeaveRoom={handleLeaveRoom}
                   handleStartGame={handleStartGame}
               />
-          )}
-
-          {/* Exibe mensagens de feedback para o usuário */}
-          {message && (
-              <div style={{ marginTop: '20px', color: isError ? 'red' : 'green' }}>
-                {message}
-              </div>
           )}
         </div>
       </div>
