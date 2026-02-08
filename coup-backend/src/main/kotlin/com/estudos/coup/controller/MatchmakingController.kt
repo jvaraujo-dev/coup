@@ -1,7 +1,7 @@
 package com.estudos.coup.controller
 
 import com.estudos.coup.controller.request.RoomRequest
-import com.estudos.coup.controller.response.RoomResponse
+import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.model.toRoomResponse
 import com.estudos.coup.service.MatchService
 import org.springframework.http.HttpStatus
@@ -18,7 +18,7 @@ class MatchmakingController(
 ) {
     @PostMapping("/create-room")
     @ResponseStatus(HttpStatus.CREATED)
-    fun createRoom(@RequestBody roomParameters: RoomRequest): RoomResponse {
+    fun createRoom(@RequestBody roomParameters: RoomRequest): ValidRoomResponse {
         val roomResponse = matchService.createRoom(roomParameters).toRoomResponse()
         return roomResponse;
     }

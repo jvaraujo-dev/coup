@@ -1,6 +1,6 @@
 package com.estudos.coup.controller
 
-import com.estudos.coup.controller.response.RoomResponse
+import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.model.StateRoom
 import com.estudos.coup.service.MatchService
 import io.mockk.every
@@ -30,7 +30,7 @@ class MatchControllerTests {
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val roomState = StateRoom.WAITING_PLAYERS
-        val room = RoomResponse(
+        val room = ValidRoomResponse(
             token = tokenRoom,
             roomName = roomName,
             players = "[]",
@@ -55,7 +55,7 @@ class MatchControllerTests {
                 "cards=[ASSASSINO, EMBAIXADOR], " +
                 "room=Room(roomName=$roomName, token=$tokenRoom))]"
         val roomState = StateRoom.WAITING_PLAYERS
-        val room = RoomResponse(
+        val room = ValidRoomResponse(
             token = tokenRoom,
             roomName = roomName,
             players = players,
@@ -82,7 +82,7 @@ class MatchControllerTests {
                 "cards=[ASSASSINO, EMBAIXADOR], " +
                 "room=Room(roomName=$roomName, token=$tokenRoom))]"
         val roomState = StateRoom.WAITING_PLAYERS
-        val room = RoomResponse(
+        val room = ValidRoomResponse(
             token = tokenRoom,
             roomName = roomName,
             players = players,

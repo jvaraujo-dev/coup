@@ -1,6 +1,6 @@
 package com.estudos.coup.model
 
-import com.estudos.coup.controller.response.RoomResponse
+import com.estudos.coup.controller.response.ValidRoomResponse
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -39,8 +39,8 @@ data class Room(
         this.state = stateRoom
     }
 }
-fun Room.toRoomResponse(): RoomResponse{
-    return RoomResponse(
+fun Room.toRoomResponse(): ValidRoomResponse{
+    return ValidRoomResponse(
         roomName = this.name,
         token = this.token,
         players = this.player.toString(),

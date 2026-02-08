@@ -2,6 +2,7 @@ package com.estudos.coup.service
 
 import com.estudos.coup.controller.request.RoomRequest
 import com.estudos.coup.controller.response.RoomResponse
+import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.model.Player
 import com.estudos.coup.model.Room
 import com.estudos.coup.model.StateRoom
@@ -22,16 +23,22 @@ fun createRoom(roomParameters: RoomRequest): Room {
         return roomRepository.save(newRoom)
     }
 
-    fun enterMatchRoom(roomToken: String, playerName:String, playerId: String = "") : RoomResponse{
+    fun enterMatchRoom(roomToken: String, playerName:String, playerId: String = "") : RoomResponse {
         val room = roomRepository.findById(roomToken).get()
         var player = playerRepository.findById(playerId).getOrElse { Player(playerName = playerName) }
+
+        val roomError = validateEnterRoom(room)
+
+        if (roomError != null) {
+            return roomError
+        }
 
         player = cardsService.provideRandomCards(2, player = player)
 
         return addPlayerToRoom(room, player).toRoomResponse()
     }
 
-    fun startGame(roomToken: String): RoomResponse{
+    fun startGame(roomToken: String): ValidRoomResponse{
         val room = roomRepository.findById(roomToken).get()
         val newRoom = Room(token = room.token, name = room.name, state = StateRoom.STARTED, player = room.player)
         roomRepository.save(newRoom)
@@ -45,14 +52,12 @@ fun createRoom(roomParameters: RoomRequest): Room {
 
         }
 
-//        println("Player with ID $playerToAdd is in Room ${room.token}.")
-
         playerRepository.save(playerToAdd)
 
         return roomRepository.save(room)
     }
 
-    fun findRoom(roomId: String): RoomResponse{
+    fun findRoom(roomId: String): ValidRoomResponse{
         return roomRepository.findById(roomId).get().toRoomResponse()
     }
 }
