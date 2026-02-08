@@ -68,27 +68,37 @@ export default function CoupGamePage() {
         setIsError(false);
 
         // Se inscreve ao tópico da sala para receber atualizações de estado
-        client.subscribe(`/topic/state-room/${roomToken}`, (room) => {
+        client.subscribe(`/topic/state-room/${roomToken}`, (message) => {
           try {
-            const rawRoom = JSON.parse(room.body);
-            const parsedPlayers = parsePlayersString(rawRoom.players);
+            const payload = JSON.parse(message.body);
 
+            if (payload.message || payload.error) {
+              setMessage(`Erro do servidor: ${payload.message || payload.error}`);
+              setIsError(true);
+              return;
+            }
+
+            if (!payload.players) {
+              console.warn("Payload recebido sem lista de jogadores:", payload);
+              return;
+            }
+
+            const parsedPlayers = parsePlayersString(payload.players);
+
+            // Atualiza a sala (Happy Path)
             setRoom({
-                token: rawRoom.token,
-                roomName: rawRoom.roomName,
-                stateRoom: rawRoom.stateRoom,
-                players: parsedPlayers,
+              token: payload.token,
+              roomName: payload.roomName,
+              stateRoom: payload.stateRoom,
+              players: parsedPlayers,
             });
-            console.log('Received and parsed room state:', {
-                token: rawRoom.token,
-                roomName: rawRoom.roomName,
-                stateRoom: rawRoom.stateRoom,
-                players: parsedPlayers,
-            });
+
+            setIsError(false);
+            setMessage('');
 
           } catch (e) {
-            console.error('Failed to parse room state message:', room.body, e);
-            setMessage('Erro ao processar o estado da sala. Dados brutos: ' + room.body);
+            console.error('Falha ao processar mensagem:', message.body, e);
+            setMessage('Erro ao processar resposta do servidor.');
             setIsError(true);
           }
         });
