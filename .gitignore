@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-coup-client/node_modules
+coup-frontend/node_modules
 */.pnp
 .pnp.*
 .yarn/*
@@ -14,8 +14,8 @@ coup-client/node_modules
 /coverage
 
 # next.js
-coup-client/.next/
-coup-client/out/
+coup-frontend/.next/
+coup-frontend/out/
 
 # production
 /build
@@ -35,7 +35,7 @@ yarn-error.log*
 .vercel
 
 *.tsbuildinfo
-coup-client/next-env.d.ts
+coup-frontend/next-env.d.ts
 
 /.gradle/
 /target/ # Para projetos Maven, mas pode ser útil
