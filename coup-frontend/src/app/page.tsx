@@ -3,18 +3,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import RoomDetails from './components/RoomDetails';
-import { PlayerState, Room } from './types'
-
+import Notification from './components/Notification';
+import { PlayerState, Room } from './types';
 
 export default function CoupGamePage() {
-  const [roomNameInput, setRoomNameInput] = useState<string>(''); // Estado para o nome da sala ao criar
-  const [roomTokenInput, setRoomTokenInput] = useState<string>(''); // Estado para o token ao entrar em sala existente
-  const [message, setMessage] = useState<string>(''); // Mensagens de feedback para o usuário
-  const [isError, setIsError] = useState<boolean>(false); // Indica se a mensagem é um erro
-  const [roomToken, setRoomToken] = useState<string | null>(null); // Token da sala ativa, controla a renderização
-  const [playerNameInput, setPlayerNameInput] = useState<string>(''); // Nome do jogador
-  const [room, setRoom] = useState<Room | null>(null); // Estado da sala recebido via WebSocket
-  const stompClientRef = useRef<Client | null>(null); // Referência para a instância do cliente STOMP
+  const [roomNameInput, setRoomNameInput] = useState<string>('');
+  const [roomTokenInput, setRoomTokenInput] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
+  const [isError, setIsError] = useState<boolean>(false);
+  const [roomToken, setRoomToken] = useState<string | null>(null);
+  const [playerNameInput, setPlayerNameInput] = useState<string>('');
+  const [room, setRoom] = useState<Room | null>(null);
+  const stompClientRef = useRef<Client | null>(null);
 
   const backendHttpUrl = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL || 'http://localhost:8080';
   const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8080/room-websocket';
@@ -23,12 +23,11 @@ export default function CoupGamePage() {
     if (message) {
       const timer = setTimeout(() => {
         setMessage('');
-      }, 5000); // A mensagem some após 5 segundos
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [message]);
 
-  // Função auxiliar para analisar a string de jogadores recebida do backend
   const parsePlayersString = useCallback((playersString: string | null | undefined): PlayerState[] => {
     if (!playersString) return [];
 
@@ -45,22 +44,19 @@ export default function CoupGamePage() {
         const cards = cardsRaw
             .replace(/\[|\]/g, "")
             .split(', ')
-            .filter(s => s.trim() !== ''); // Garante que não haja entradas vazias se houver vírgulas extra
+            .filter(s => s.trim() !== '');
 
         return { playerId, playerName, cards } as PlayerState;
       }
       return null;
-    }).filter((p): p is PlayerState => p !== null); // Filtra nulos e garante a tipagem
+    }).filter((p): p is PlayerState => p !== null);
   }, []);
 
-  // Efeito para gerenciar a conexão WebSocket. Ativa ou desativa o cliente STOMP
-  // quando o roomToken ou parsePlayersString muda.
   useEffect(() => {
     if (roomToken) {
-      // Se já existe um cliente STOMP ativo, desativá-lo primeiro
       if (stompClientRef.current && stompClientRef.current.active) {
         stompClientRef.current.deactivate();
-        stompClientRef.current = null; // Limpa a referência antiga
+        stompClientRef.current = null;
       }
 
       const client = new Client({
@@ -76,7 +72,6 @@ export default function CoupGamePage() {
         setMessage('Conectado ao WebSocket da sala!');
         setIsError(false);
 
-        // Se inscreve ao tópico da sala para receber atualizações de estado
         client.subscribe(`/topic/state-room/${roomToken}`, (message) => {
           try {
             const payload = JSON.parse(message.body);
@@ -94,16 +89,12 @@ export default function CoupGamePage() {
 
             const parsedPlayers = parsePlayersString(payload.players);
 
-            // Atualiza a sala (Happy Path)
             setRoom({
               token: payload.token,
               roomName: payload.roomName,
               stateRoom: payload.stateRoom,
               players: parsedPlayers,
             });
-
-            setIsError(false);
-            setMessage('');
 
           } catch (e) {
             console.error('Falha ao processar mensagem:', message.body, e);
@@ -112,14 +103,12 @@ export default function CoupGamePage() {
           }
         });
 
-        // Solicita o estado inicial da sala ao backend
         client.publish({
           destination: "/app/state-game",
           body: roomToken
         });
       };
 
-      // Handlers para erros e desconexão do WebSocket
       client.onWebSocketError = (error) => {
         console.error('Error with websocket', error);
         setMessage('Erro na conexão WebSocket.');
@@ -128,7 +117,6 @@ export default function CoupGamePage() {
 
       client.onStompError = (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
-        console.error('Additional details: ' + frame.body);
         setMessage('Erro no protocolo STOMP.');
         setIsError(true);
       };
@@ -139,28 +127,24 @@ export default function CoupGamePage() {
         setIsError(false);
       };
 
-      client.activate(); // Ativa o cliente STOMP
-      stompClientRef.current = client; // Armazena a instância no ref
+      client.activate();
+      stompClientRef.current = client;
 
-      // Função de limpeza: desativa o cliente STOMP quando o componente desmonta ou roomToken muda
       return () => {
         if (stompClientRef.current && stompClientRef.current.active) {
           stompClientRef.current.deactivate();
         }
       };
     } else {
-      // Se não há roomToken, garante que o cliente STOMP seja desativado
       if (stompClientRef.current && stompClientRef.current.active) {
         stompClientRef.current.deactivate();
       }
       stompClientRef.current = null;
     }
-  }, [roomToken, websocketUrl, parsePlayersString]); // Dependências do useEffect
+  }, [roomToken, websocketUrl, parsePlayersString]);
 
-  // Handler para criar uma nova sala via HTTP POST
   const handleCreateRoom = async (event: React.FormEvent) => {
     event.preventDefault();
-
     setMessage('');
     setIsError(false);
 
@@ -173,16 +157,14 @@ export default function CoupGamePage() {
     try {
       const response = await fetch(`${backendHttpUrl}/create-room`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ roomName: roomNameInput }),
       });
 
       if (response.ok) {
         const roomData = await response.json();
-        setRoomToken(roomData.token); // Define o token da sala para ativar o useEffect do WebSocket
-        setMessage(`Sala "${roomData.roomName}" criada com sucesso! Token: ${roomData.token}`);
+        setRoomToken(roomData.token);
+        setMessage(`Sala "${roomData.roomName}" criada!`);
         setIsError(false);
         setRoomNameInput('');
       } else {
@@ -192,17 +174,15 @@ export default function CoupGamePage() {
       }
     } catch (error) {
       console.error('Erro na requisição HTTP:', error);
-      setMessage('Não foi possível conectar ao servidor backend. Verifique se ele está rodando.');
+      setMessage('Não foi possível conectar ao servidor backend.');
       setIsError(true);
     }
   };
 
-  // Handler para um jogador entrar no jogo (publicar nome para o backend via WebSocket)
   const handleJoinGame = () => {
     setMessage('');
     setIsError(false);
 
-    // Usa o token da sala atualmente ativa (roomToken) ou, se não houver, o do input (roomTokenInput)
     const currentToken = roomToken || roomTokenInput;
 
     if (!playerNameInput.trim()) {
@@ -217,54 +197,44 @@ export default function CoupGamePage() {
       return;
     }
 
-    // Se o roomToken ainda não estiver definido (vindo do input de entrar sala), defina-o
-    // Isso garante que o useEffect seja ativado para conectar ao WebSocket antes de publicar.
     if (!roomToken && roomTokenInput.trim()) {
       setRoomToken(roomTokenInput.trim());
     }
 
-    // Verifica se o cliente STOMP está ativo antes de publicar
     if (!stompClientRef.current || !stompClientRef.current.active) {
-      setMessage("Conexão WebSocket não está ativa. Tente novamente ou verifique a sala.");
+      setMessage("Conexão WebSocket não está ativa. Tente novamente.");
       setIsError(true);
       return;
     }
 
-    // Publica a mensagem para o backend com o nome do jogador
     stompClientRef.current.publish({
       destination: `/app/${currentToken}/join-game`,
       body: playerNameInput,
     });
-
-    console.log(`Sent join-game request for player: ${playerNameInput} in room: ${currentToken}`);
   };
 
   const handleStartGame = () => {
-
-      if (!stompClientRef.current || !stompClientRef.current.active) {
-          setMessage("Conexão WebSocket não está ativa. Tente novamente ou verifique a sala.");
-          setIsError(true);
-          return;
-      }
-
-      stompClientRef.current.publish({
-          destination: `/app/${roomToken}/start`
-      });
+    if (!stompClientRef.current || !stompClientRef.current.active) {
+      setMessage("Conexão WebSocket não está ativa.");
+      setIsError(true);
+      return;
+    }
+    stompClientRef.current.publish({
+      destination: `/app/${roomToken}/start`
+    });
   }
 
-  // Handler para sair da sala e desconectar do WebSocket
   const handleLeaveRoom = () => {
     if (stompClientRef.current && stompClientRef.current.active) {
       stompClientRef.current.deactivate();
     }
-    setRoomToken(null); // Volta para a tela de criação/entrada de sala
-    setRoom(null); // Limpa o estado da sala
-    setPlayerNameInput(''); // Limpa o nome do jogador
+    setRoomToken(null);
+    setRoom(null);
+    setPlayerNameInput('');
     setMessage('Você saiu da sala.');
     setIsError(false);
   };
 
-  // Handler para entrar em uma sala existente usando o token
   const handleEnterExistingRoom = (event: React.FormEvent) => {
     event.preventDefault();
     setMessage('');
@@ -275,19 +245,23 @@ export default function CoupGamePage() {
       setIsError(true);
       return;
     }
-    // Define o token da sala para ativar o useEffect e a conexão WebSocket
     setRoomToken(roomTokenInput.trim());
   };
 
-
   return (
       <div className="center-container">
+
+        <Notification
+            message={message}
+            isError={isError}
+            onClose={() => setMessage('')}
+        />
+
         <div className="form-card">
           {!roomToken ? (
-              // Se não há token da sala, mostra os formulários de entrada e criação de sala
               <>
                 <h2>Entrar em Sala Existente</h2>
-                <form onSubmit={handleEnterExistingRoom}> {/* Novo formulário para entrar em sala existente */}
+                <form onSubmit={handleEnterExistingRoom}>
                   <div className="form-group">
                     <label htmlFor="tokenRoom">Token da Sala:</label>
                     <input
@@ -305,7 +279,7 @@ export default function CoupGamePage() {
                   </button>
                 </form>
 
-                <hr /> {/* Separador entre os formulários */}
+                <hr />
 
                 <h2>Criar Nova Sala</h2>
                 <form onSubmit={handleCreateRoom}>
@@ -327,7 +301,6 @@ export default function CoupGamePage() {
                 </form>
               </>
           ) : (
-              // Se há token da sala, renderiza o componente RoomDetails para mostrar os detalhes da sala
               <RoomDetails
                   room={room}
                   roomToken={roomToken}
