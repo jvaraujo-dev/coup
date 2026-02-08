@@ -11,6 +11,7 @@ import com.estudos.coup.repository.RoomRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
@@ -65,7 +66,10 @@ class MatchServiceTest {
         every { playerRepository.findById(any())} returns Optional.empty()
         every { cardsService.provideRandomCards(any(), any()) } returns expectedPlayer
 
-        val result = matchService.enterMatchRoom(roomToken = room.token, playerName = player.playerName)
+        val result = matchService.enterMatchRoom(
+            roomToken = room.token,
+            playerName = player.playerName
+        ) as ValidRoomResponse
 
         verify(exactly = 1) { roomRepository.save(any()) }
         verify(exactly = 1) { playerRepository.save(any()) }
@@ -90,7 +94,10 @@ class MatchServiceTest {
         every { playerRepository.findById(any())} returns Optional.of(expectedPlayer)
         every { cardsService.provideRandomCards(any(), any()) } returns expectedPlayer
 
-        val result = matchService.enterMatchRoom(roomToken = room.token, playerName = player.playerName)
+        val result = matchService.enterMatchRoom(
+            roomToken = room.token,
+            playerName = player.playerName
+        ) as ValidRoomResponse
 
         verify(exactly = 1) { roomRepository.save(any()) }
         verify(exactly = 1) { playerRepository.save(any()) }
