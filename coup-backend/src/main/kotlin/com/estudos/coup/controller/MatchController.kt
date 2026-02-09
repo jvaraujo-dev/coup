@@ -8,15 +8,10 @@ import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.CrossOrigin
 
 @Controller
-@CrossOrigin(origins = ["\${cors.allowed-origins}"])
-class MatchController(
-    private val matchService: MatchService,
-    private val simpMessagingTemplate: SimpMessagingTemplate
-) {
-
+class MatchController(private val matchService: MatchService,
+                      private val simpMessagingTemplate: SimpMessagingTemplate) {
     @MessageMapping("/state-game")
     fun stateRoom(@Payload roomToken: String){
         val room = matchService.findRoom(roomToken)

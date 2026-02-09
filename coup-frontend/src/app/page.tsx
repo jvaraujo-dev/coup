@@ -66,7 +66,7 @@ export default function Home() {
     if (!roomToken || !playerNameInput) return alert("Preencha o token e seu nome");
 
     try {
-      const response = await fetch(`${API_URL}/api/rooms/${roomToken}/join-room`, {
+      const response = await fetch(`${API_URL}/${roomToken}/join-game`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ player_name: playerNameInput })
