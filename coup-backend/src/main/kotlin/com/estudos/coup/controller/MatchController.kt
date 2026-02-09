@@ -10,8 +10,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 
 @Controller
-class MatchController(private val matchService: MatchService,
-                      private val simpMessagingTemplate: SimpMessagingTemplate) {
+class MatchController(
+    private val matchService: MatchService,
+    private val simpMessagingTemplate: SimpMessagingTemplate
+) {
+
     @MessageMapping("/state-game")
     fun stateRoom(@Payload roomToken: String){
         val room = matchService.findRoom(roomToken)
@@ -31,7 +34,13 @@ class MatchController(private val matchService: MatchService,
     }
 
     private fun publishRoomState(room: RoomResponse){
-        val destinationTopic = "/topic/state-room/${room.token}"
-        simpMessagingTemplate.convertAndSend(destinationTopic, room)
+        if (room is ValidRoomResponse) {
+            room.players.forEach { player ->
+                val filteredState = room.filterForPlayer(player.playerId)
+
+                val destination = "/topic/state-room/${room.token}/${player.playerId}"
+                simpMessagingTemplate.convertAndSend(destination, filteredState)
+            }
+        }
     }
 }
