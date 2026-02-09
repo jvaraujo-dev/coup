@@ -1,94 +1,150 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Room } from './types';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Client } from '@stomp/stompjs';
 import RoomDetails from './components/RoomDetails';
+import Notification from './components/Notification';
 import SockJS from 'sockjs-client';
-import { Client } from "@stomp/stompjs";
+import { Room } from './types';
 
-export default function Home() {
-  const [room, setRoom] = useState<Room | null>(null);
-  const [roomToken, setRoomToken] = useState<string>('');
-  const [newRoomName, setNewRoomName] = useState<string>(''); // Novo estado para criação
+interface PlayerState {
+  playerId: string;
+  playerName: string;
+  cards: string[];
+}
+
+export default function CoupGamePage() {Interface
+  const [message, setMessage] = useState<string>('');
+  const [isError, setIsError] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'join' | 'create'>('join');
+
+  const [roomNameInput, setRoomNameInput] = useState<string>('');
+  const [roomTokenInput, setRoomTokenInput] = useState<string>('');
   const [playerNameInput, setPlayerNameInput] = useState<string>('');
+
+  const [roomToken, setRoomToken] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const stompClient = useRef<Client | null>(null);
+  const [room, setRoom] = useState<Room | null>(null);
+
+  const stompClientRef = useRef<Client | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  const connectWebSocket = (token: string, id: string) => {
-    if (stompClient.current) {
-      stompClient.current.deactivate();
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(''), 5000);
+      return () => clearTimeout(timer);
     }
+  }, [message]);
 
+  const connectWebSocket = useCallback((token: string, myId: string) => {
+    if (stompClientRef.current?.active) return;
+
+    console.log("Iniciando conexão WebSocket...");
     const client = new Client({
       webSocketFactory: () => new SockJS(`${API_URL}/ws-coup`),
+      reconnectDelay: 5000,
       onConnect: () => {
-        console.log("Conectado ao WebSocket");
+        console.log('WebSocket Conectado!');
+        setMessage('Conectado ao jogo!');
+        setIsError(false);
 
-        client.subscribe(`/topic/state-room/${token}/${id}`, (message) => {
-          const updatedRoom = JSON.parse(message.body);
-          setRoom(updatedRoom);
+        client.subscribe(`/topic/state-room/${token}/${myId}`, (msg) => {
+          try {
+            const updatedRoom = JSON.parse(msg.body);
+            setRoom(updatedRoom);
+          } catch (e) {
+            console.error("Erro ao processar estado da sala", e);
+          }
         });
 
-        client.publish({
-          destination: "/app/state-game",
-          body: token
-        });
+        client.publish({ destination: "/app/state-game", body: token });
       },
+      onStompError: (frame) => {
+        console.error('Erro STOMP:', frame.headers['message']);
+        setMessage('Erro na conexão em tempo real.');
+        setIsError(true);
+      }
     });
 
     client.activate();
-    stompClient.current = client;
-  };
+    stompClientRef.current = client;
+  }, [API_URL]);
 
-  const handleCreateRoom = async () => {
-    if (!newRoomName) return alert("Digite um nome para a sala");
+  useEffect(() => {
+    return () => {
+      if (stompClientRef.current) stompClientRef.current.deactivate();
+    };
+  }, []);
+
+  const handleCreateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!roomNameInput.trim()) return setMessage('Digite um nome para a sala.');
 
     try {
-      const response = await fetch(`${API_URL}/create-room`, {
+      const res = await fetch(`${API_URL}/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomName: newRoomName })
+        body: JSON.stringify({ roomName: roomNameInput }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setRoomToken(data.token); // Redireciona logicamente preenchendo o token
-        alert(`Sala criada! Use o token: ${data.token}`);
+      if (res.ok) {
+        const data = await res.json();
+        setRoomTokenInput(data.token); // Preenche o token para o usuário entrar
+        setMessage(`Sala criada! Token: ${data.token}`);
+        setIsError(false);
+        setActiveTab('join'); // Muda para a aba de entrar
+      } else {
+        throw new Error('Falha ao criar sala');
       }
     } catch (error) {
-      console.error("Erro ao criar sala:", error);
+      setMessage('Erro ao criar sala. O servidor está rodando?');
+      setIsError(true);
     }
   };
 
-  const handleJoinGame = async () => {
-    if (!roomToken || !playerNameInput) return alert("Preencha o token e seu nome");
+  const handleJoinGame = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    const tokenToUse = roomToken || roomTokenInput;
+
+    if (!tokenToUse || !playerNameInput.trim()) {
+      setMessage("Preencha o Token da sala e seu Nome.");
+      setIsError(true);
+      return;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/${roomToken}/join-game`, {
+      // PASS O 1: Chamada HTTP para entrar e pegar o ID
+      const res = await fetch(`${API_URL}/api/rooms/${tokenToUse}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_name: playerNameInput })
+        body: JSON.stringify({ playerName: playerNameInput }),
       });
 
-      if (response.ok) {
-        const playerData = await response.json();
-        setPlayerId(playerData.playerId);
-        connectWebSocket(roomToken, playerData.playerId);
+      if (res.ok) {
+        const data = await res.json();
+        const newPlayerId = data.playerId;
+
+        setRoomToken(tokenToUse);
+        setPlayerId(newPlayerId);
+
+        connectWebSocket(tokenToUse, newPlayerId);
       } else {
-        const errorData = await response.json();
-        alert(`Erro: ${errorData.message || "Não foi possível entrar na sala"}`);
+        const err = await res.json();
+        setMessage(`Erro: ${err.message || 'Não foi possível entrar.'}`);
+        setIsError(true);
       }
     } catch (error) {
-      console.error("Erro na conexão:", error);
-      alert("Erro de conexão com o servidor. Verifique se o backend está rodando.");
+      console.error(error);
+      setMessage('Erro de conexão com o servidor.');
+      setIsError(true);
     }
   };
 
   const handleStartGame = () => {
-    if (stompClient.current && roomToken) {
-      stompClient.current.publish({
+    if (stompClientRef.current && roomToken) {
+      stompClientRef.current.publish({
         destination: `/app/${roomToken}/start`,
         body: "{}"
       });
@@ -96,70 +152,95 @@ export default function Home() {
   };
 
   const handleLeaveRoom = () => {
-    if (stompClient.current) {
-      stompClient.current.deactivate();
-      setRoom(null);
-      setPlayerId(null);
-      setRoomToken('');
-    }
+    if (stompClientRef.current) stompClientRef.current.deactivate();
+    setRoomToken(null);
+    setRoom(null);
+    setPlayerId(null);
+    setMessage('Você saiu da sala.');
   };
 
   return (
-      <main className="container mt-5">
-        {!room ? (
-            <div className="row">
-              {/* SEÇÃO CRIAR SALA */}
-              <div className="col-md-6">
-                <div className="card p-4 shadow-sm">
-                  <h3>Criar Nova Sala</h3>
-                  <input
-                      className="form-control mb-2"
-                      placeholder="Nome da Sala (ex: Jogo do João)"
-                      value={newRoomName}
-                      onChange={(e) => setNewRoomName(e.target.value)}
-                  />
-                  <button className="btn btn-success w-100" onClick={handleCreateRoom}>
-                    Criar Sala
-                  </button>
-                </div>
+      <div className="center-container">
+        <Notification
+            message={message}
+            isError={isError}
+            onClose={() => setMessage('')}
+        />
+
+        {!roomToken ? (
+            <div className="form-card">
+              <div className="tabs mb-4">
+                <button
+                    className={`btn ${activeTab === 'join' ? 'btn-primary' : 'btn-outline-primary'} me-2`}
+                    onClick={() => setActiveTab('join')}
+                >
+                  Entrar em Sala
+                </button>
+                <button
+                    className={`btn ${activeTab === 'create' ? 'btn-success' : 'btn-outline-success'}`}
+                    onClick={() => setActiveTab('create')}
+                >
+                  Criar Nova
+                </button>
               </div>
 
-              {/* SEÇÃO ENTRAR EM SALA */}
-              <div className="col-md-6">
-                <div className="card p-4 shadow-sm">
-                  <h3>Entrar em Sala Existente</h3>
-                  <input
-                      className="form-control mb-2"
-                      placeholder="Token da Sala"
-                      value={roomToken}
-                      onChange={(e) => setRoomToken(e.target.value)}
-                  />
-                  <input
-                      className="form-control mb-2"
-                      placeholder="Seu Nome"
-                      value={playerNameInput}
-                      onChange={(e) => setPlayerNameInput(e.target.value)}
-                  />
-                  <button className="btn btn-primary w-100" onClick={handleJoinGame}>
-                    Entrar no Jogo
-                  </button>
-                </div>
-              </div>
+              {activeTab === 'join' ? (
+                  <form onSubmit={handleJoinGame}>
+                    <div className="form-group mb-3">
+                      <label>Token da Sala:</label>
+                      <input
+                          className="form-control"
+                          placeholder="Ex: abc-123"
+                          value={roomTokenInput}
+                          onChange={(e) => setRoomTokenInput(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group mb-3">
+                      <label>Seu Nome:</label>
+                      <input
+                          className="form-control"
+                          placeholder="Seu Apelido"
+                          value={playerNameInput}
+                          onChange={(e) => setPlayerNameInput(e.target.value)}
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary w-100">
+                      Entrar no Jogo
+                    </button>
+                  </form>
+              ) : (
+                  <form onSubmit={handleCreateRoom}>
+                    <div className="form-group mb-3">
+                      <label>Nome da Sala:</label>
+                      <input
+                          className="form-control"
+                          placeholder="Ex: Jogo da Galera"
+                          value={roomNameInput}
+                          onChange={(e) => setRoomNameInput(e.target.value)}
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-success w-100">
+                      Criar Sala
+                    </button>
+                  </form>
+              )}
             </div>
         ) : (
-            <div className="card p-4 shadow-lg">
-              <RoomDetails
-                  room={room}
-                  playerId={playerId}
-                  playerNameInput={playerNameInput}
-                  setPlayerNameInput={setPlayerNameInput}
-                  handleJoinGame={handleJoinGame}
-                  handleLeaveRoom={handleLeaveRoom}
-                  handleStartGame={handleStartGame}
-                  roomToken={roomToken}
-              />
+            <div className="game-container" style={{ width: '100%', maxWidth: '800px' }}>
+              <div className="card p-4 shadow-lg">
+                <RoomDetails
+                    room={room}
+                    roomToken={roomToken}
+                    playerNameInput={playerNameInput}
+                    setPlayerNameInput={setPlayerNameInput}
+                    handleJoinGame={() => {}}
+                    handleLeaveRoom={handleLeaveRoom}
+                    handleStartGame={handleStartGame}
+                    playerId={playerId}
+                />
+              </div>
             </div>
         )}
-      </main>
+      </div>
   );
 }
