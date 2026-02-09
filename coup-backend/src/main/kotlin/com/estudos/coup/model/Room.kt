@@ -39,11 +39,11 @@ data class Room(
         this.state = stateRoom
     }
 }
-fun Room.toRoomResponse(): ValidRoomResponse{
+fun Room.toRoomResponse(): ValidRoomResponse {
     return ValidRoomResponse(
-        roomName = this.name,
         token = this.token,
-        players = this.player.toString(),
-        stateRoom = this.state.description
+        roomName = this.name,
+        stateRoom = this.state,
+        players = this.player.map { it.toPlayerResponse() }
     )
 }
