@@ -5,7 +5,7 @@ export interface CardType {
 export interface PlayerState {
     playerId: string;
     playerName: string;
-    cards: CardType[] | string[];
+    cards: string[];
 }
 
 export interface Room {
@@ -19,6 +19,7 @@ export interface RoomDetailsProps {
     room: Room | null;
     roomToken: string | null;
     playerNameInput: string;
+    playerId: string | null;
     setPlayerNameInput: (name: string) => void;
     handleJoinGame: () => void;
     handleLeaveRoom: () => void;

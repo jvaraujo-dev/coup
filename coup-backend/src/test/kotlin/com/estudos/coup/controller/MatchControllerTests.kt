@@ -1,6 +1,8 @@
 package com.estudos.coup.controller
 
 import com.estudos.coup.controller.response.ValidRoomResponse
+import com.estudos.coup.model.CardType
+import com.estudos.coup.model.Player
 import com.estudos.coup.model.StateRoom
 import com.estudos.coup.service.MatchService
 import io.mockk.every
@@ -30,11 +32,13 @@ class MatchControllerTests {
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val roomState = StateRoom.WAITING_PLAYERS
+
         val room = ValidRoomResponse(
             token = tokenRoom,
             roomName = roomName,
-            players = "[]",
-            stateRoom = roomState.description)
+            players = emptyList(),
+            stateRoom = roomState
+        )
 
         every { matchService.findRoom(any()) } returns room
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
@@ -49,17 +53,20 @@ class MatchControllerTests {
     fun shouldPublishRoomStateWithValidPlayers(){
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
-        val players = "[Player(" +
-                "playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, " +
-                "playerName=Player 1, " +
-                "cards=[ASSASSINO, EMBAIXADOR], " +
-                "room=Room(roomName=$roomName, token=$tokenRoom))]"
+        val players = listOf(
+            Player(
+                playerId = "77b522a9-f853-4f5f-aac8-006d920a3d1e",
+                playerName = "Player 1",
+                cards = mutableListOf(CardType.ASSASSINO, CardType.EMBAIXADOR)
+            )
+        )
+
         val roomState = StateRoom.WAITING_PLAYERS
         val room = ValidRoomResponse(
             token = tokenRoom,
             roomName = roomName,
             players = players,
-            stateRoom = roomState.description)
+            stateRoom = roomState)
 
         every { matchService.findRoom(any()) } returns room
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
@@ -76,17 +83,19 @@ class MatchControllerTests {
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val playerName = "Player 1"
-        val players = "[Player(" +
-                "playerId=77b522a9-f853-4f5f-aac8-006d920a3d1e, " +
-                "playerName=Player 1, " +
-                "cards=[ASSASSINO, EMBAIXADOR], " +
-                "room=Room(roomName=$roomName, token=$tokenRoom))]"
+        val players = listOf(
+            Player(
+                playerId = "77b522a9-f853-4f5f-aac8-006d920a3d1e",
+                playerName = "Player 1",
+                cards = mutableListOf(CardType.ASSASSINO, CardType.EMBAIXADOR)
+            )
+        )
         val roomState = StateRoom.WAITING_PLAYERS
         val room = ValidRoomResponse(
             token = tokenRoom,
             roomName = roomName,
             players = players,
-            stateRoom = roomState.description)
+            stateRoom = roomState)
 
         every { matchService.enterMatchRoom(any(),any()) } returns room
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()

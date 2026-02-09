@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import {PlayerState, RoomDetailsProps} from '../types'
+import { PlayerState, RoomDetailsProps } from '../types'
 
 const RoomDetails: React.FC<RoomDetailsProps> = ({
                                                      room,
@@ -9,34 +9,34 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                                                      setPlayerNameInput,
                                                      handleJoinGame,
                                                      handleLeaveRoom,
-                                                     handleStartGame
-}) => {
+                                                     handleStartGame,
+                                                     playerId
+                                                 }) => {
 
     let playersTableRows;
 
     if (room?.players && room.players.length > 0) {
         playersTableRows = room.players.map((player: PlayerState) => {
-            const cards = player.cards.toString().split(",").slice(0, 2)
-            const cardsDisplay = player.cards.length > 0
-                ? cards.join(", ")
-                : 'Sem cartas';
+            const cardsDisplay = player.cards && player.cards.length > 0
+                ? player.cards.join(", ")
+                : '🃏 Carta Oculta';
 
             return (
-                <tr key={player.playerId}>
-                    <td>{player.playerName}</td>
+                <tr key={player.playerId} style={player.playerId === playerId ? { fontWeight: 'bold', color: '#4facfe' } : {}}>
+                    <td>
+                        {player.playerName} {player.playerId === playerId ? "(Você)" : ""}
+                    </td>
                     <td>{cardsDisplay}</td>
                 </tr>
             );
         });
     } else {
-        // Se não houver jogadores, exibe uma mensagem na tabela
         playersTableRows = (
             <tr>
                 <td colSpan={2}>Nenhum jogador nesta sala ainda.</td>
             </tr>
         );
     }
-    // --- Fim da Lógica JavaScript Separada ---
 
     return (
         <>
@@ -77,7 +77,7 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                 </tr>
                 </thead>
                 <tbody>
-                {playersTableRows} {/* Renderiza a variável que contém as linhas da tabela */}
+                {playersTableRows}
                 </tbody>
             </table>
         </>
