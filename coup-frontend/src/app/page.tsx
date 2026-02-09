@@ -22,7 +22,7 @@ export default function CoupGamePage() {
 
   const stompClientRef = useRef<Client | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL;
+  const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL || 'http://localhost:8080';
 
   useEffect(() => {
     if (message) {
@@ -125,7 +125,8 @@ export default function CoupGamePage() {
 
       const data = await res.json();
 
-      if (data.error != null) {
+      if (data.error == null) {
+        console.log(data)
         const newPlayerId = data.playerId;
 
         setRoomToken(tokenToUse);
@@ -133,7 +134,8 @@ export default function CoupGamePage() {
 
         connectWebSocket(tokenToUse, newPlayerId);
       } else {
-        setMessage(`${data.message}`);
+        console.log(data)
+        setMessage(`${data.error}`);
         setIsError(true);
       }
     } catch (error) {

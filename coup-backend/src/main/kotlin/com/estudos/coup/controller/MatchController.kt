@@ -31,7 +31,7 @@ class MatchController(
         val roomResponse = matchService.enterMatchRoom(roomToken = roomToken, playerName = playerName)
 
         if (roomResponse is ErrorRoomResponse) {
-            return mapOf("message" to roomResponse.error)
+            return mapOf("error" to roomResponse.error)
         }
 
         publishRoomState(roomResponse)
