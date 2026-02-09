@@ -36,7 +36,7 @@ export default function CoupGamePage() {
 
     console.log("Iniciando conexão WebSocket...");
     const client = new Client({
-      webSocketFactory: () => new SockJS(`${API_URL}/ws-coup`),
+      webSocketFactory: () => new SockJS(`${API_URL}/room-websocket`),
       reconnectDelay: 5000,
       onConnect: () => {
         console.log('WebSocket Conectado!');
@@ -58,6 +58,9 @@ export default function CoupGamePage() {
         console.error('Erro STOMP:', frame.headers['message']);
         setMessage('Erro na conexão em tempo real.');
         setIsError(true);
+      },
+      onWebSocketClose: () => {
+        console.log("Conexão fechada.");
       }
     });
 
@@ -84,7 +87,7 @@ export default function CoupGamePage() {
 
       if (res.ok) {
         const data = await res.json();
-        setRoomTokenInput(data.token); // Preenche o token para o usuário entrar
+        setRoomTokenInput(data.token);
         setMessage(`Sala criada! Token: ${data.token}`);
         setIsError(false);
         setActiveTab('join'); // Muda para a aba de entrar
@@ -92,6 +95,7 @@ export default function CoupGamePage() {
         throw new Error('Falha ao criar sala');
       }
     } catch (error) {
+      console.error(error)
       setMessage('Erro ao criar sala. O servidor está rodando?');
       setIsError(true);
     }
@@ -105,6 +109,10 @@ export default function CoupGamePage() {
     if (!tokenToUse || !playerNameInput.trim()) {
       setMessage("Preencha o Token da sala e seu Nome.");
       setIsError(true);
+      return;
+    }
+
+    if (roomToken === tokenToUse && playerId && stompClientRef.current?.active) {
       return;
     }
 

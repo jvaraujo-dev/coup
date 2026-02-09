@@ -7,10 +7,9 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
 
-
 @Configuration
 @EnableWebSocketMessageBroker
-class WebSocketConfig(
+open class WebSocketConfig(
     @Value("\${cors.allowed-origins}") private val allowedOrigins: String
 ) : WebSocketMessageBrokerConfigurer {
 
@@ -22,6 +21,6 @@ class WebSocketConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry.addEndpoint("/room-websocket")
             .setAllowedOrigins(allowedOrigins)
+            .withSockJS()
     }
-
 }

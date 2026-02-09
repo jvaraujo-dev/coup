@@ -52,10 +52,8 @@ class MatchController(
     private fun publishRoomState(room: RoomResponse){
         if (room is ValidRoomResponse) {
             room.players.forEach { player ->
-                // Filtra o estado para que cada jogador veja apenas suas cartas
                 val filteredState = room.filterForPlayer(player.playerId)
 
-                // Envia para o tópico específico daquele jogador
                 val destination = "/topic/state-room/${room.token}/${player.playerId}"
                 simpMessagingTemplate.convertAndSend(destination, filteredState)
             }
