@@ -7,13 +7,7 @@ import Notification from './components/Notification';
 import SockJS from 'sockjs-client';
 import { Room } from './types';
 
-interface PlayerState {
-  playerId: string;
-  playerName: string;
-  cards: string[];
-}
-
-export default function CoupGamePage() {Interface
+export default function CoupGamePage() {
   const [message, setMessage] = useState<string>('');
   const [isError, setIsError] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'join' | 'create'>('join');
@@ -115,7 +109,6 @@ export default function CoupGamePage() {Interface
     }
 
     try {
-      // PASS O 1: Chamada HTTP para entrar e pegar o ID
       const res = await fetch(`${API_URL}/api/rooms/${tokenToUse}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
