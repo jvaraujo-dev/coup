@@ -29,28 +29,6 @@ class MatchControllerTests {
     }
 
     @Test
-    fun shouldPublishRoomStateWithoutPlayers(){
-        val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
-        val roomName = "Test state-game"
-        val roomState = StateRoom.WAITING_PLAYERS
-
-        val room = ValidRoomResponse(
-            token = tokenRoom,
-            roomName = roomName,
-            players = emptyList(),
-            stateRoom = roomState
-        )
-
-        every { matchService.findRoom(any()) } returns room
-        every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
-
-        controller.stateRoom(tokenRoom)
-        verify { simpMessagingTemplate.convertAndSend(
-            "/topic/state-room/${room.token}",
-            eq(room)) }
-    }
-
-    @Test
     fun shouldPublishRoomStateWithValidPlayers(){
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
@@ -61,6 +39,7 @@ class MatchControllerTests {
                 cards = mutableListOf(CardType.ASSASSINO, CardType.EMBAIXADOR)
             )
         )
+        val expectedTopic = "/topic/state-room/$tokenRoom/${players[0].playerId}"
 
         val roomState = StateRoom.WAITING_PLAYERS
         val room = ValidRoomResponse(
@@ -75,7 +54,7 @@ class MatchControllerTests {
         controller.stateRoom(tokenRoom)
 
         verify { simpMessagingTemplate.convertAndSend(
-            "/topic/state-room/${room.token}",
+            expectedTopic,
             eq(room)) }
     }
 
