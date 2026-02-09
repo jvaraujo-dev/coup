@@ -3,7 +3,6 @@ package com.estudos.coup.controller
 import com.estudos.coup.controller.response.PlayerResponse
 import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.model.CardType
-import com.estudos.coup.model.Player
 import com.estudos.coup.model.StateRoom
 import com.estudos.coup.service.MatchService
 import io.mockk.every
@@ -80,7 +79,7 @@ class MatchControllerTests {
         every { matchService.enterMatchRoom(any(),any()) } returns room
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
 
-        controller.joinGame(tokenRoom, playerName)
+        controller.joinRoomHTTP(tokenRoom, mapOf("playerName" to playerName))
 
         verify { matchService.enterMatchRoom(eq(tokenRoom), eq(playerName)) }
     }

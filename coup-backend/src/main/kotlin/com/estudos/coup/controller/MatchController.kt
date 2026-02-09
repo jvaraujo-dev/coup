@@ -32,7 +32,7 @@ class MatchController(
 
         val playerId = (roomResponse as? ValidRoomResponse)?.players
             ?.find { it.playerName == playerName }?.playerId
-            ?: throw IllegalStateException("Erro ao recuperar ID do jogador")
+            ?: error("Erro ao recuperar ID do jogador")
 
         return mapOf("playerId" to playerId)
     }
