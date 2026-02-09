@@ -1,5 +1,6 @@
 package com.estudos.coup.controller
 
+import com.estudos.coup.controller.response.PlayerResponse
 import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.model.CardType
 import com.estudos.coup.model.Player
@@ -54,7 +55,7 @@ class MatchControllerTests {
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val players = listOf(
-            Player(
+            PlayerResponse(
                 playerId = "77b522a9-f853-4f5f-aac8-006d920a3d1e",
                 playerName = "Player 1",
                 cards = mutableListOf(CardType.ASSASSINO, CardType.EMBAIXADOR)
@@ -84,7 +85,7 @@ class MatchControllerTests {
         val roomName = "Test state-game"
         val playerName = "Player 1"
         val players = listOf(
-            Player(
+            PlayerResponse(
                 playerId = "77b522a9-f853-4f5f-aac8-006d920a3d1e",
                 playerName = "Player 1",
                 cards = mutableListOf(CardType.ASSASSINO, CardType.EMBAIXADOR)

@@ -39,7 +39,7 @@ fun Player.toPlayerResponse(): PlayerResponse {
     return PlayerResponse(
         playerId = this.playerId,
         playerName = this.playerName,
-        cards = this.cards,
+        cards = this.cards.toMutableList(),
         room = this.room?.token ?: ""
     )
 }
