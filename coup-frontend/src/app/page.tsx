@@ -4,38 +4,44 @@ import { useState, useRef } from 'react';
 import { Room } from './types';
 import RoomDetails from './components/RoomDetails';
 import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
+import {Client} from "@stomp/stompjs";
 
 export default function Home() {
   const [room, setRoom] = useState<Room | null>(null);
   const [roomToken, setRoomToken] = useState<string>('');
   const [playerNameInput, setPlayerNameInput] = useState<string>('');
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const stompClient = useRef<Stomp.Client | null>(null);
+  const stompClient = useRef<Client | null>(null);
 
   // Busca URL das variáveis de ambiente
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
   const connectWebSocket = (token: string, id: string) => {
-    // Encerra conexão anterior se existir
     if (stompClient.current) {
-      stompClient.current.disconnect(() => {});
+      stompClient.current.deactivate();
     }
 
-    const socket = new SockJS(`${API_URL}/ws-coup`);
-    const client = Stomp.over(socket);
+    const client = new Client({
+      webSocketFactory: () => new SockJS(`${API_URL}/ws-coup`),
+      onConnect: () => {
+        console.log("Conectado ao WebSocket");
 
-    client.connect({}, () => {
-      console.log("Conectado ao WebSocket");
-
-      client.subscribe(`/topic/state-room/${token}/${id}`, (message: { body: string; }) => {
-        const updatedRoom = JSON.parse(message.body);
-        setRoom(updatedRoom);
-      });
-
-      client.send("/app/state-game", {}, token);
+        client.subscribe(`/topic/state-room/${token}/${id}`, (message) => {
+          const updatedRoom = JSON.parse(message.body);
+          setRoom(updatedRoom);
+        });
+        
+        client.publish({
+          destination: "/app/state-game",
+          body: token
+        });
+      },
+      onStompError: (frame) => {
+        console.error('Erro no STOMP: ' + frame.headers['message']);
+      },
     });
 
+    client.activate();
     stompClient.current = client;
   };
 
