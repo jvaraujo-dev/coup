@@ -22,7 +22,7 @@ export default function CoupGamePage() {
 
   const stompClientRef = useRef<Client | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL;
 
   useEffect(() => {
     if (message) {

@@ -1,6 +1,5 @@
 package com.estudos.coup.controller.response
 
-import com.estudos.coup.model.CardType
 import com.estudos.coup.model.StateRoom
 
 data class ValidRoomResponse(
@@ -15,7 +14,7 @@ data class ValidRoomResponse(
             if (player.playerId == targetPlayerId) {
                 player
             } else {
-                player.copy(cards = mutableListOf<CardType>())
+                player.copy(cards = mutableListOf())
             }
         }
         return this.copy(players = filteredPlayers)
