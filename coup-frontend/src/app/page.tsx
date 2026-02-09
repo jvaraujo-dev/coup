@@ -123,8 +123,9 @@ export default function CoupGamePage() {
         body: JSON.stringify({ playerName: playerNameInput }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+
+      if (data.error != null) {
         const newPlayerId = data.playerId;
 
         setRoomToken(tokenToUse);
@@ -132,8 +133,7 @@ export default function CoupGamePage() {
 
         connectWebSocket(tokenToUse, newPlayerId);
       } else {
-        const err = await res.json();
-        setMessage(`Erro: ${err.message || 'Não foi possível entrar.'}`);
+        setMessage(`${data.message}`);
         setIsError(true);
       }
     } catch (error) {

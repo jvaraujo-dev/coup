@@ -1,8 +1,10 @@
 package com.estudos.coup.controller
 
+import com.estudos.coup.controller.response.ErrorRoomResponse
 import com.estudos.coup.controller.response.RoomResponse
 import com.estudos.coup.controller.response.ValidRoomResponse
 import com.estudos.coup.service.MatchService
+import org.springframework.http.ResponseEntity
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
@@ -27,6 +29,10 @@ class MatchController(
         val playerName = request["playerName"] ?: throw IllegalArgumentException("Nome do jogador é obrigatório")
 
         val roomResponse = matchService.enterMatchRoom(roomToken = roomToken, playerName = playerName)
+
+        if (roomResponse is ErrorRoomResponse) {
+            return mapOf("message" to roomResponse.error)
+        }
 
         publishRoomState(roomResponse)
 
