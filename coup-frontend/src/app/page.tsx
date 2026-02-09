@@ -66,10 +66,10 @@ export default function Home() {
     if (!roomToken || !playerNameInput) return alert("Preencha o token e seu nome");
 
     try {
-      const response = await fetch(`${API_URL}/api/rooms/${roomToken}/join`, {
+      const response = await fetch(`${API_URL}/api/rooms/${roomToken}/join-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName: playerNameInput })
+        body: JSON.stringify({ player_name: playerNameInput })
       });
 
       if (response.ok) {
@@ -77,10 +77,12 @@ export default function Home() {
         setPlayerId(playerData.playerId);
         connectWebSocket(roomToken, playerData.playerId);
       } else {
-        alert("Erro ao entrar na sala. Verifique se o token é válido.");
+        const errorData = await response.json();
+        alert(`Erro: ${errorData.message || "Não foi possível entrar na sala"}`);
       }
     } catch (error) {
       console.error("Erro na conexão:", error);
+      alert("Erro de conexão com o servidor. Verifique se o backend está rodando.");
     }
   };
 
