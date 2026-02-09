@@ -1,8 +1,23 @@
 package com.estudos.coup.controller.response
 
+import com.estudos.coup.model.CardType
+import com.estudos.coup.model.StateRoom
+
 data class ValidRoomResponse(
     override val token: String,
     val roomName: String,
-    val players: String?,
-    val stateRoom: String
-) : RoomResponse
+    val stateRoom: StateRoom,
+    val players: List<PlayerResponse>
+) : RoomResponse {
+
+    fun filterForPlayer(targetPlayerId: String): ValidRoomResponse {
+        val filteredPlayers = players.map { player ->
+            if (player.playerId == targetPlayerId) {
+                player
+            } else {
+                player.copy(cards = mutableListOf<CardType>())
+            }
+        }
+        return this.copy(players = filteredPlayers)
+    }
+}

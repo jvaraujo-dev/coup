@@ -35,11 +35,11 @@ data class Player(
         cards = mutableListOf()
     )
 }
-fun Player.toPlayerResponse(): PlayerResponse{
+fun Player.toPlayerResponse(): PlayerResponse {
     return PlayerResponse(
         playerId = this.playerId,
         playerName = this.playerName,
-        cards = this.cards.toString(),
-        room = this.room?.name ?: ""
+        cards = this.cards.toMutableList(),
+        room = this.room?.token ?: ""
     )
 }

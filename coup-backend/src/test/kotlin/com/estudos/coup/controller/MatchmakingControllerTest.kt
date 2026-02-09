@@ -33,7 +33,7 @@ class MatchmakingControllerTest {
 
         val controllerResponse = matchmakingController.createRoom(roomRequest)
 
-        assertEquals(room.player.toString(),controllerResponse.players)
+        assertEquals(room.player.toString(),controllerResponse.players.toString())
         assertEquals(room.name,controllerResponse.roomName)
         assertEquals(room.token,controllerResponse.token)
         verify(exactly = 1) { matchService.createRoom(roomParameters = roomRequest) }
