@@ -15,7 +15,6 @@ data class ValidRoomResponse(
             if (player.playerId == targetPlayerId) {
                 player
             } else {
-                // Use mutableListOf<CardType>() para garantir compatibilidade de tipo e mutabilidade
                 player.copy(cards = mutableListOf<CardType>())
             }
         }
