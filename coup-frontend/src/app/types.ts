@@ -12,6 +12,7 @@ export interface Room {
     token: string;
     roomName: string;
     stateRoom: string;
+    ownerId: string;
     players: PlayerState[];
 }
 

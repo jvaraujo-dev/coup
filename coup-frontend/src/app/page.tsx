@@ -87,6 +87,9 @@ export default function CoupGamePage() {
 
       if (res.ok) {
         const data = await res.json();
+        if (data.ownerId) {
+          localStorage.setItem('user_session', data.ownerId);
+        }
         setRoomTokenInput(data.token);
         setMessage(`Sala criada! Token: ${data.token}`);
         setIsError(false);

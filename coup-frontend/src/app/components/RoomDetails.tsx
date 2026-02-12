@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react'; // [1] Importar hooks
 import { PlayerState, RoomDetailsProps } from '../types'
 
 const RoomDetails: React.FC<RoomDetailsProps> = ({
@@ -12,6 +12,15 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                                                      handleStartGame,
                                                      playerId
                                                  }) => {
+
+    const [isOwner, setIsOwner] = useState(false);
+
+    useEffect(() => {
+        if (room?.ownerId) {
+            const mySession = localStorage.getItem('user_session');
+            setIsOwner(mySession === room.ownerId);
+        }
+    }, [room]);
 
     let playersTableRows;
 
@@ -25,6 +34,7 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                 <tr key={player.playerId} style={player.playerId === playerId ? { fontWeight: 'bold', color: '#4facfe' } : {}}>
                     <td>
                         {player.playerName} {player.playerId === playerId ? "(Você)" : ""}
+                        {room.ownerId === player.playerId && " 👑"}
                     </td>
                     <td>{cardsDisplay}</td>
                 </tr>
@@ -54,16 +64,25 @@ const RoomDetails: React.FC<RoomDetailsProps> = ({
                     value={playerNameInput}
                     onChange={(e) => setPlayerNameInput(e.target.value)}
                 />
+
                 <button onClick={handleJoinGame} className="btn btn-info" style={{ marginLeft: '10px' }}>
                     Entrar no Jogo
                 </button>
 
-                <button onClick={handleStartGame} className="btn btn-success" style={{ marginLeft: '10px' }}>
-                    Iniciar Jogo
-                </button>
+                {isOwner && room?.stateRoom === 'WAITING_PLAYERS' && (
+                    <button onClick={handleStartGame} className="btn btn-success" style={{ marginLeft: '10px' }}>
+                        Iniciar Jogo
+                    </button>
+                )}
             </div>
 
-            <button onClick={handleLeaveRoom} className="btn btn-warning" type="button">
+            {!isOwner && room?.stateRoom === 'WAITING_PLAYERS' && (
+                <p className="text-muted" style={{ fontStyle: 'italic', marginTop: '10px' }}>
+                    Aguardando o dono da sala iniciar a partida...
+                </p>
+            )}
+
+            <button onClick={handleLeaveRoom} className="btn btn-warning" type="button" style={{ marginTop: '10px' }}>
                 Sair da Sala
             </button>
             <hr />
