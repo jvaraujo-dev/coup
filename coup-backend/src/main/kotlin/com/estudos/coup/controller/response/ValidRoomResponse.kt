@@ -6,6 +6,7 @@ data class ValidRoomResponse(
     override val token: String,
     val roomName: String,
     val stateRoom: StateRoom,
+    val ownerId: String?,
     val players: List<PlayerResponse>
 ) : RoomResponse {
 

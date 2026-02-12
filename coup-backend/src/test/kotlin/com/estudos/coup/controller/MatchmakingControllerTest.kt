@@ -23,7 +23,6 @@ class MatchmakingControllerTest {
     @BeforeEach
     fun setUp()  {
         matchService = mockk()
-        val servletResponse = mockk<HttpServletResponse>()
 
         matchmakingController = MatchmakingController(matchService)
     }

@@ -150,9 +150,11 @@ export default function CoupGamePage() {
 
   const handleStartGame = () => {
     if (stompClientRef.current && roomToken) {
+      const mySessionId = localStorage.getItem('user_session');
+
       stompClientRef.current.publish({
         destination: `/app/${roomToken}/start`,
-        body: "{}"
+        body: JSON.stringify({ sessionId: mySessionId })
       });
     }
   };

@@ -47,6 +47,7 @@ fun Room.toRoomResponse(): ValidRoomResponse {
         token = this.token,
         roomName = this.name,
         stateRoom = this.state,
+        ownerId = ownerId,
         players = this.player.map { p: Player -> p.toPlayerResponse() }
     )
 }
