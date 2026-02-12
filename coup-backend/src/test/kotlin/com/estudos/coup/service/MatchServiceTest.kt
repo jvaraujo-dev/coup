@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
+import java.util.UUID
 import kotlin.test.assertEquals
 
 class MatchServiceTest {
@@ -37,12 +38,19 @@ class MatchServiceTest {
     @Test
     fun `should create and save a room`() {
         val roomName = "Test Room"
-        val roomToSave = Room(name = roomName)
+        val ownerId = UUID.randomUUID().toString()
+        val roomToSave = Room(
+            name = roomName,
+            ownerId = ownerId
+        )
         val roomRequest = RoomRequest(roomName = roomName)
 
         every { roomRepository.save(any())} returns roomToSave
 
-        val result = matchService.createRoom(roomRequest)
+        val result = matchService.createRoom(
+            roomParameters = roomRequest,
+            ownerId = ownerId,
+        )
 
         verify(exactly = 0) { playerRepository.save(any()) }
         verify(exactly = 1) { roomRepository.save(any()) }

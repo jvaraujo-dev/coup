@@ -18,8 +18,11 @@ class MatchService(
     private val playerRepository: PlayerRepository,
     private val cardsService: CardsService) {
 
-fun createRoom(roomParameters: RoomRequest): Room {
-        val newRoom = Room(name = roomParameters.roomName)
+fun createRoom(roomParameters: RoomRequest, ownerId: String): Room {
+        val newRoom = Room(
+            name = roomParameters.roomName,
+            ownerId = ownerId
+        )
         return roomRepository.save(newRoom)
     }
 
@@ -38,8 +41,13 @@ fun createRoom(roomParameters: RoomRequest): Room {
         return addPlayerToRoom(room, player).toRoomResponse()
     }
 
-    fun startGame(roomToken: String): ValidRoomResponse{
+    fun startGame(roomToken: String, requesterId: String): ValidRoomResponse{
         val room = roomRepository.findById(roomToken).get()
+
+        if (room.ownerId != requesterId) {
+            throw IllegalAccessException("Apenas o dono da sala pode iniciar a partida.")
+        }
+
         val newRoom = Room(token = room.token, name = room.name, state = StateRoom.STARTED, player = room.player)
         roomRepository.save(newRoom)
         return newRoom.toRoomResponse()

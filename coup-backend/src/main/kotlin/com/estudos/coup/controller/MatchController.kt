@@ -50,8 +50,17 @@ class MatchController(
     }
 
     @MessageMapping("/{roomToken}/start")
-    fun startGame(@DestinationVariable roomToken: String){
-        val updatedRoom = matchService.startGame(roomToken= roomToken)
+    fun startGame(
+        @DestinationVariable roomToken: String,
+        @Payload payload: Map<String, String>
+    ){
+
+        val requesterId = payload["sessionId"] ?: throw IllegalArgumentException("Session ID ausente")
+
+        val updatedRoom = matchService.startGame(
+            roomToken = roomToken,
+            requesterId = requesterId
+        )
         publishRoomState(updatedRoom)
     }
 

@@ -18,6 +18,8 @@ data class Room(
     val token: String = UUID.randomUUID().toString(),
     val name: String,
 
+    var ownerId: String? = null,
+
     @Enumerated(EnumType.STRING)
     var state: StateRoom = StateRoom.WAITING_PLAYERS,
 
