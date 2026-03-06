@@ -11,6 +11,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import java.util.UUID
 
 class MatchControllerTests {
 
@@ -31,6 +32,7 @@ class MatchControllerTests {
     fun shouldPublishRoomStateWithValidPlayers(){
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
+        val ownerId = UUID.randomUUID().toString()
         val players = listOf(
             PlayerResponse(
                 playerId = "77b522a9-f853-4f5f-aac8-006d920a3d1e",
@@ -45,7 +47,8 @@ class MatchControllerTests {
             token = tokenRoom,
             roomName = roomName,
             players = players,
-            stateRoom = roomState)
+            stateRoom = roomState,
+            ownerId = ownerId)
 
         every { matchService.findRoom(any()) } returns room
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()
@@ -62,6 +65,7 @@ class MatchControllerTests {
         val tokenRoom = "abb0a758-64fe-4d01-bc9a-7ad8e821e06b"
         val roomName = "Test state-game"
         val playerName = "Player 1"
+        val ownerId = UUID.randomUUID().toString()
         val players = listOf(
             PlayerResponse(
                 playerId = "77b522a9-f853-4f5f-aac8-006d920a3d1e",
@@ -74,7 +78,8 @@ class MatchControllerTests {
             token = tokenRoom,
             roomName = roomName,
             players = players,
-            stateRoom = roomState)
+            stateRoom = roomState,
+            ownerId = ownerId)
 
         every { matchService.enterMatchRoom(any(),any()) } returns room
         every { simpMessagingTemplate.convertAndSend(any(), any<String>()) } returns mockk()

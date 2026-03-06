@@ -29,8 +29,8 @@ fun createRoom(roomParameters: RoomRequest, ownerId: String): Room {
     fun enterMatchRoom(roomToken: String, playerName:String, playerId: String = "") : RoomResponse {
         val room = roomRepository.findById(roomToken).get()
         var player = playerRepository.findById(playerId).getOrElse { Player(playerName = playerName) }
-
-        val roomError = validateEnterRoom(room)
+        println(player.toString())
+        val roomError = validateEnterRoom(room, player)
 
         if (roomError != null) {
             return roomError
