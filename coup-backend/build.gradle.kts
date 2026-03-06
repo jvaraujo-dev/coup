@@ -13,6 +13,11 @@ plugins {
 group = "com.estudos"
 version = "0.0.1-SNAPSHOT"
 
+//version = findProperty("customVersion") ?: "0.0.1-SNAPSHOT"
+
+//val timestamp = SimpleDateFormat("yyyyMMddHHmmss").format(Date())
+//version = "0.0.1-$timestamp"
+
 java {
 	toolchain {
 		languageVersion.set(JavaLanguageVersion.of(21))
@@ -121,4 +126,8 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.check {
 	dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.getByName("jar"){
+	enabled = false
 }
